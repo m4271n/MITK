@@ -1,43 +1,18 @@
-/****************************************************************************
-**
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
-** Contact: http://www.qt-project.org/legal
-**
-** This file is part of the demonstration applications of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and Digia.  For licensing terms and
-** conditions see http://qt.digia.com/licensing.  For further information
-** use the contact form at http://qt.digia.com/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU Lesser General Public License version 2.1 requirements
-** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, Digia gives you certain additional
-** rights.  These rights are described in the Digia Qt LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3.0 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU General Public License version 3.0 requirements will be
-** met: http://www.gnu.org/copyleft/gpl.html.
-**
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+/*===================================================================
+
+The Medical Imaging Interaction Toolkit (MITK)
+
+Copyright (c) German Cancer Research Center,
+Division of Medical and Biological Informatics.
+All rights reserved.
+
+This software is distributed WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.
+
+See LICENSE.txt or http://www.mitk.org for details.
+
+===================================================================*/
 
 #include "QmlMitkRenderWindowItem.h"
 
@@ -49,6 +24,7 @@
 #include <QVTKInteractorAdapter.h>
 
 // MITK event types
+#include "mitkTouchEvent.h"
 #include "mitkMousePressEvent.h"
 #include "mitkMouseMoveEvent.h"
 #include "mitkMouseDoubleClickEvent.h"
@@ -159,7 +135,6 @@ void QmlMitkRenderWindowItem::SetDataStorage(mitk::DataStorage::Pointer storage)
 
 mitk::Point2D QmlMitkRenderWindowItem::GetMousePosition(QMouseEvent* me) const
 {
-
   mitk::Point2D point;
   point[0] = me->x();
   point[1] = me->y();
@@ -252,6 +227,102 @@ mitk::InteractionEvent::MouseButtons QmlMitkRenderWindowItem::GetButtonState(QWh
     buttonState = buttonState | mitk::InteractionEvent::MiddleMouseButton;
   }
   return buttonState;
+}
+
+mitk::InteractionEvent::TouchEventType QmlMitkRenderWindowItem::GetTouchEventType(QTouchEvent* te) const
+{
+  mitk::InteractionEvent::TouchEventType eventType;
+  switch (te->type())
+  {
+  case QEvent::Type::TouchBegin:
+    eventType = mitk::InteractionEvent::TouchEventType::Begin;
+    break;
+  case QEvent::Type::TouchUpdate:
+    eventType = mitk::InteractionEvent::TouchEventType::Update;
+    break;
+  case QEvent::Type::TouchEnd:
+    eventType = mitk::InteractionEvent::TouchEventType::End;
+    break;
+  default:
+    eventType = mitk::InteractionEvent::TouchEventType::Begin;
+    break;
+  }
+  return eventType;
+}
+
+mitk::InteractionEvent::TouchDeviceType QmlMitkRenderWindowItem::GetTouchDeviceType(QTouchEvent* te) const
+{
+  mitk::InteractionEvent::TouchDeviceType devType;
+  switch (te->device()->type())
+  {
+  case QTouchDevice::TouchScreen:
+    devType = mitk::InteractionEvent::TouchDeviceType::TouchScreen;
+    break;
+  case QTouchDevice::TouchPad:
+    devType = mitk::InteractionEvent::TouchDeviceType::TouchPad;
+    break;
+  default:
+    devType = mitk::InteractionEvent::TouchDeviceType::TouchScreen;
+    break;
+  }
+  return devType;
+}
+
+mitk::Point2D QmlMitkRenderWindowItem::GetTouchPointPosition(QTouchEvent::TouchPoint* tp) const
+{
+  mitk::Point2D point;
+  point[0] = tp->pos().x();
+  point[1] = tp->pos().y();
+  m_Renderer->GetDisplayGeometry()->ULDisplayToDisplay(point, point);
+  return point;
+}
+
+std::list<mitk::Point2D> QmlMitkRenderWindowItem::GetTouchPointPositions(QTouchEvent* te) const
+{
+  std::list<mitk::Point2D> positions;
+
+  const QList<QTouchEvent::TouchPoint>& touchPoints = te->touchPoints();
+  Q_FOREACH(QTouchEvent::TouchPoint tp, touchPoints)
+  {
+    positions.push_back(this->GetTouchPointPosition(&tp));
+  }
+  return positions;
+}
+
+mitk::InteractionEvent::TouchPointState QmlMitkRenderWindowItem::GetTouchPointState(QTouchEvent::TouchPoint* tp) const
+{
+  mitk::InteractionEvent::TouchPointState tpState;
+  switch (tp->state())
+  {
+  case Qt::TouchPointPressed:
+    tpState = mitk::InteractionEvent::TouchPointState::Pressed;
+    break;
+  case Qt::TouchPointMoved:
+    tpState = mitk::InteractionEvent::TouchPointState::Moved;
+    break;
+  case Qt::TouchPointStationary:
+    tpState = mitk::InteractionEvent::TouchPointState::Stationary;
+    break;
+  case Qt::TouchPointReleased:
+    tpState = mitk::InteractionEvent::TouchPointState::Released;
+    break;
+  default:
+    tpState = mitk::InteractionEvent::TouchPointState::Pressed;
+    break;
+  }
+  return tpState;
+}
+
+std::list<mitk::InteractionEvent::TouchPointState> QmlMitkRenderWindowItem::GetTouchPointStates(QTouchEvent* te) const
+{
+  std::list<mitk::InteractionEvent::TouchPointState> states;
+
+  const QList<QTouchEvent::TouchPoint>& touchPoints = te->touchPoints();
+  Q_FOREACH(QTouchEvent::TouchPoint tp, touchPoints)
+  {
+    states.push_back(this->GetTouchPointState(&tp));
+  }
+  return states;
 }
 
 
@@ -356,6 +427,18 @@ void QmlMitkRenderWindowItem::wheelEvent(QWheelEvent *we)
 //    we->ignore();
 }
 
+void QmlMitkRenderWindowItem::touchEvent(QTouchEvent* te)
+{
+  //mitk::Point2D mousePosition = /*GetTouchPointPositions*/(te);
+  //mitk::Point3D worldPosition = mitk::RenderWindowBase::GetRenderer()->Map2DRendererPositionTo3DWorldPosition(mousePosition);
+  mitk::TouchEvent::Pointer touchEvent =
+    mitk::TouchEvent::New(mitk::RenderWindowBase::GetRenderer(), GetTouchPointPositions(te),
+    GetTouchPointStates(te), GetTouchEventType(te), GetTouchDeviceType(te));
+
+  mitk::RenderWindowBase::HandleEvent(touchEvent.GetPointer());
+
+  QVTKQuickItem::touchEvent(te);
+}
 
 void QmlMitkRenderWindowItem::prepareForRender()
 {

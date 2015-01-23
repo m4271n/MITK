@@ -64,6 +64,30 @@ namespace mitk
     };
 
     /**
+    * Touch and TouchPoint state values and touch device types
+    */
+    enum TouchEventType
+    {
+       Begin = 0x0000,
+       Update = 0x1000,
+       End = 0x2000
+    };
+
+    enum TouchPointState
+    {
+       Pressed = 0x00000,
+       Moved = 0x10000,
+       Stationary = 0x20000,
+       Released = 0x40000
+    };
+
+    enum TouchDeviceType
+    {
+       TouchScreen = 0x000000,
+       TouchPad = 0x100000
+    };
+
+    /**
      * KeyConstants Constants for special keys
      */
     // Special Keys

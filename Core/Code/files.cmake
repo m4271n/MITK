@@ -288,6 +288,7 @@ set(CPP_FILES
   Interactions/mitkVtkInteractorStyle.cxx
   Interactions/mitkCrosshairPositionEvent.cpp
   Interactions/mitkXML2EventParser.cpp
+  Interactions/mitkTouchEvent.cpp
 
   Interfaces/mitkInteractionEventObserver.cpp
   Interfaces/mitkIShaderRepository.cpp

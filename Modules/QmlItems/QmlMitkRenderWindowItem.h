@@ -1,3 +1,19 @@
+/*===================================================================
+
+The Medical Imaging Interaction Toolkit (MITK)
+
+Copyright (c) German Cancer Research Center,
+Division of Medical and Biological Informatics.
+All rights reserved.
+
+This software is distributed WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.
+
+See LICENSE.txt or http://www.mitk.org for details.
+
+===================================================================*/
+
 #ifndef QmlMitkRenderWindowItem_h
 #define QmlMitkRenderWindowItem_h
 
@@ -61,10 +77,19 @@ protected:
   mitk::InteractionEvent::MouseButtons GetButtonState(QWheelEvent* we) const;
   void geometryChanged(const QRectF & newGeometry, const QRectF & oldGeometry); // !?
 
+  mitk::Point2D GetTouchPointPosition(QTouchEvent::TouchPoint* tp) const;
+  std::list<mitk::Point2D> GetTouchPointPositions(QTouchEvent* te) const;
+  mitk::InteractionEvent::TouchPointState GetTouchPointState(QTouchEvent::TouchPoint* tp) const;
+  std::list<mitk::InteractionEvent::TouchPointState> GetTouchPointStates(QTouchEvent* te) const;
+  mitk::InteractionEvent::TouchDeviceType GetTouchDeviceType(QTouchEvent* te) const;
+  mitk::InteractionEvent::TouchEventType GetTouchEventType(QTouchEvent* te) const;
+
   virtual void mousePressEvent(QMouseEvent* e);
   virtual void mouseReleaseEvent(QMouseEvent* e);
   virtual void mouseMoveEvent(QMouseEvent* e);
   virtual void wheelEvent(QWheelEvent* e);
+
+  virtual void touchEvent(QTouchEvent* e);
 
 private slots:
 
