@@ -48,7 +48,7 @@ set(${PROJECT_NAME}_LIBRARIES
   QxtCore
   QxtWidgets
   QxtNetwork
-  QxtWeb
+#  QxtWeb
 )
 
 set(QXT_CORE_MOC_HEADERS
@@ -464,7 +464,7 @@ add_library(QxtNetwork SHARED ${_qxt_network_sources})
 if(DESIRED_QT_VERSION MATCHES "4")
   target_link_libraries(QxtNetwork QxtCore ${QT_LIBRARIES})
 else()
-  target_link_libraries(QxtNetwork Qt5::Network)
+  target_link_libraries(QxtNetwork Qt5::Network QxtCore)
 endif()
 
 set_target_properties(QxtNetwork PROPERTIES
@@ -472,14 +472,14 @@ set_target_properties(QxtNetwork PROPERTIES
                       COMPILE_DEFINITIONS "BUILD_QXT_NETWORK")
 
 # Build the QxtWeb library
-_qt_wrap_cpp(_qxt_web_sources ${_qxt_web_moc_headers})
+#_qt_wrap_cpp(_qxt_web_sources ${_qxt_web_moc_headers})
 
-add_library(QxtWeb SHARED ${_qxt_web_sources})
-target_link_libraries(QxtWeb QxtCore QxtNetwork ${QT_LIBRARIES})
+#add_library(QxtWeb SHARED ${_qxt_web_sources})
+#target_link_libraries(QxtWeb QxtCore QxtNetwork ${QT_LIBRARIES})
 
-set_target_properties(QxtWeb PROPERTIES
-                      SOVERSION ${${PROJECT_NAME}_VERSION}
-                      COMPILE_DEFINITIONS "BUILD_QXT_WEB")
+#set_target_properties(QxtWeb PROPERTIES
+#                      SOVERSION ${${PROJECT_NAME}_VERSION}
+#                      COMPILE_DEFINITIONS "BUILD_QXT_WEB")
 
 
 # Build the designer plug-in
