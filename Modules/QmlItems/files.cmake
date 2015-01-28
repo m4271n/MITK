@@ -5,6 +5,9 @@ set(CPP_FILES
   InteractionLegacy/QmitkEventAdapter.cpp
   QmlMitkBigRenderLock.cpp
   QmlMitkFourRenderWindowWidget.cpp
+  mitkGestureManager.cpp
+  mitkGestureRecognizer.h
+  mitkStandardGestureRecognizer.cpp
 )
 
 set(MOC_H_FILES

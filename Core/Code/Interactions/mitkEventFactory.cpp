@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <mitkTouchEvent.h>
+#include <mitkPanGestureEvent.h>
+#include <mitkGestureEvent.h>
 #include <mitkMousePressEvent.h>
 #include <mitkMouseDoubleClickEvent.h>
 #include <mitkMouseMoveEvent.h>
@@ -266,6 +269,12 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
   std::string strWheelDelta;
   int wheelDelta;
   std::string strSignalName = "";
+  std::string strGestureRating;
+  GestureEvent::GestureRating gestureRating = GestureEvent::Ignore;
+  std::string strEventState;
+  InteractionEvent::EventState gestureState = InteractionEvent::Begin;
+  std::string strTouchDeviceType;
+  InteractionEvent::TouchDeviceType touchDeviceType = InteractionEvent::TouchScreen;
 
   Point2D pos;
   pos.Fill(0);
@@ -379,6 +388,7 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
   {
     key = strKey;
   }
+
   // WheelDelta
   if (!list->GetStringProperty(InteractionEventConst::xmlEventPropertyScrollDirection().c_str(), strWheelDelta))
   {
@@ -396,6 +406,103 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
       wheelDelta = 1;
     }
   }
+
+  // Parse GestureRating
+  if (list->GetStringProperty(InteractionEventConst::xmlEventPropertyGestureRating().c_str(), strGestureRating))
+  {
+    std::vector<std::string> mods = split(strGestureRating, ',');
+    for (std::vector<std::string>::iterator it = mods.begin(); it != mods.end(); ++it)
+    {
+      std::transform((*it).begin(), (*it).end(), (*it).begin(), ::toupper);
+      if (*it == "IGNORE")
+      {
+        gestureRating = gestureRating | GestureEvent::Ignore;
+      }
+      else if (*it == "MAYBEGESTURE")
+      {
+        gestureRating = gestureRating | GestureEvent::MayBeGesture;
+      }
+      else if (*it == "TRIGGERGESTURE")
+      {
+        gestureRating = gestureRating | GestureEvent::TriggerGesture;
+      }
+      else if (*it == "FINISHGESTURE")
+      {
+        gestureRating = gestureRating | GestureEvent::FinishGesture;
+      }
+      else if (*it == "CANCELGESTURE")
+      {
+        gestureRating = gestureRating | GestureEvent::CancelGesture;
+      }
+      else
+      {
+        MITK_WARN << "mitkEventFactory: Invalid event gesture rating in config file:" << (*it);
+      }
+    }
+  }
+
+  // Parse EventState
+  if (list->GetStringProperty(InteractionEventConst::xmlEventPropertyEventState().c_str(), strEventState))
+  {
+    std::vector<std::string> mods = split(strEventState, ',');
+    for (std::vector<std::string>::iterator it = mods.begin(); it != mods.end(); ++it)
+    {
+      std::transform((*it).begin(), (*it).end(), (*it).begin(), ::toupper);
+      if (*it == "BEGIN")
+      {
+        gestureState = gestureState | InteractionEvent::Begin;
+      }
+      else if (*it == "UPDATE")
+      {
+        gestureState = gestureState | InteractionEvent::Update;
+      }
+      else if (*it == "END")
+      {
+        gestureState = gestureState | InteractionEvent::End;
+      }
+      else
+      {
+        MITK_WARN << "mitkEventFactory: Invalid event gesture state in config file:" << (*it);
+      }
+    }
+  }
+
+  // Parse TouchDeviceType
+  if (list->GetStringProperty(InteractionEventConst::xmlEventPropertyTouchDeviceType().c_str(), strTouchDeviceType))
+  {
+    std::vector<std::string> mods = split(strTouchDeviceType, ',');
+    for (std::vector<std::string>::iterator it = mods.begin(); it != mods.end(); ++it)
+    {
+      std::transform((*it).begin(), (*it).end(), (*it).begin(), ::toupper);
+      if (*it == "TOUCHPAD")
+      {
+        touchDeviceType = touchDeviceType | InteractionEvent::TouchPad;
+      }
+      else if (*it == "TOUCHSCREEN")
+      {
+        touchDeviceType = touchDeviceType | InteractionEvent::TouchScreen;
+      }
+      else
+      {
+        MITK_WARN << "mitkEventFactory: Invalid touch device type in config file:" << (*it);
+      }
+    }
+  }
+
+  //std::list<Point2D> touchPointpos;
+  //std::string strTouchPointPos;
+
+  //// Touchpoint position on screen
+  //if (list->GetStringProperty(InteractionEventConst::xmlEventPropertyTouchPointPositionsOnScreen().c_str(), strTouchPointPos))
+  //{
+  //  //split comma separated string
+  //  int commaPos;
+  //  commaPos = strTouchPointPos.find_first_of(',');
+
+  //  touchPointpos[0] = static_cast<mitk::ScalarType>(std::atof(strTouchPointPos.substr(0, commaPos).c_str()));
+  //  touchPointpos[1] = static_cast<mitk::ScalarType>(std::atof(strTouchPointPos.substr(commaPos + 1, strTouchPointPos.length()).c_str()));
+  //}
+
   // Internal Signals Name
   list->GetStringProperty(InteractionEventConst::xmlEventPropertySignalName().c_str(), strSignalName);
 
@@ -463,6 +570,18 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
   else if (eventClass == "INTERACTIONEVENT")
   {
     event = InteractionEvent::New(renderer);
+  }
+  else if (eventClass == "GESTUREEVENT")
+  {
+    event = GestureEvent::New(renderer, gestureRating, gestureState);
+  }
+  else if (eventClass == "PANGESTUREEVENT")
+  {
+    event = PanGestureEvent::New(renderer, gestureRating, gestureState);
+  }
+  else if (eventClass == "TOUCHEVENT")
+  {
+    event = TouchEvent::New(renderer, gestureState, touchDeviceType);
   }
   if (event.IsNull())
   {

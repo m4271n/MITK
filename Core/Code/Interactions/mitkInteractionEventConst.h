@@ -58,6 +58,10 @@ struct MITK_CORE_EXPORT InteractionEventConst
   static const std::string xmlEventPropertyRendererName(); // = "RendererName";
   static const std::string xmlEventPropertyViewDirection(); // = "ViewDirection";
   static const std::string xmlEventPropertyMapperID(); // = "MapperID";
+  static const std::string xmlEventPropertyGestureRating(); // = "GestureRating";
+  static const std::string xmlEventPropertyEventState(); // = "EventState";
+  static const std::string xmlEventPropertyTouchDeviceType(); // = "TouchDeviceType";
+  static const std::string xmlEventPropertyTouchPointPositionsOnScreen(); // = "TouchPointPositionsOnScreen";
 };
 
 }     //namespace mitk

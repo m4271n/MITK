@@ -21,6 +21,17 @@
   <event_variant class="MouseMoveEvent" name="Moving">
     <attribute name="ButtonState" value="MiddleMouseButton"/>
   </event_variant>
+  <!-- testing -->
+  <event_variant class="PanGestureEvent" name="EndGestureMoving">
+    <attribute name="EventState" value="End"/>
+  </event_variant>
+  <event_variant class="PanGestureEvent" name="GestureMoving">
+    <attribute name="EventState" value="Update"/>
+  </event_variant>
+  <event_variant class="PanGestureEvent" name="StartGestureMove">
+    <attribute name="EventState" value="Begin"/>
+  </event_variant>
+  <!-- testing END -->
   <!-- Zooming -->
   <event_variant class="MousePressEvent" name="StartZoom">
     <attribute name="EventButton" value="RightMouseButton"/>

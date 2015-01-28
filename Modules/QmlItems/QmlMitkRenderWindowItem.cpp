@@ -118,6 +118,8 @@ void QmlMitkRenderWindowItem::init()
 
     m_DataStorage->Add( planeNode, m_PlaneNodeParent );
   }
+
+  m_GestureManager.SetRenderer(this->GetRenderer());
 }
 
 void QmlMitkRenderWindowItem::InitView( mitk::BaseRenderer::MapperSlotId mapperID,
@@ -229,22 +231,22 @@ mitk::InteractionEvent::MouseButtons QmlMitkRenderWindowItem::GetButtonState(QWh
   return buttonState;
 }
 
-mitk::InteractionEvent::TouchEventType QmlMitkRenderWindowItem::GetTouchEventType(QTouchEvent* te) const
+mitk::InteractionEvent::EventState QmlMitkRenderWindowItem::GetEventState(QTouchEvent* te) const
 {
-  mitk::InteractionEvent::TouchEventType eventType;
+  mitk::InteractionEvent::EventState eventType;
   switch (te->type())
   {
   case QEvent::Type::TouchBegin:
-    eventType = mitk::InteractionEvent::TouchEventType::Begin;
+    eventType = mitk::InteractionEvent::EventState::Begin;
     break;
   case QEvent::Type::TouchUpdate:
-    eventType = mitk::InteractionEvent::TouchEventType::Update;
+    eventType = mitk::InteractionEvent::EventState::Update;
     break;
   case QEvent::Type::TouchEnd:
-    eventType = mitk::InteractionEvent::TouchEventType::End;
+    eventType = mitk::InteractionEvent::EventState::End;
     break;
   default:
-    eventType = mitk::InteractionEvent::TouchEventType::Begin;
+    eventType = mitk::InteractionEvent::EventState::Begin;
     break;
   }
   return eventType;
@@ -429,13 +431,15 @@ void QmlMitkRenderWindowItem::wheelEvent(QWheelEvent *we)
 
 void QmlMitkRenderWindowItem::touchEvent(QTouchEvent* te)
 {
-  //mitk::Point2D mousePosition = /*GetTouchPointPositions*/(te);
-  //mitk::Point3D worldPosition = mitk::RenderWindowBase::GetRenderer()->Map2DRendererPositionTo3DWorldPosition(mousePosition);
   mitk::TouchEvent::Pointer touchEvent =
-    mitk::TouchEvent::New(mitk::RenderWindowBase::GetRenderer(), GetTouchPointPositions(te),
-    GetTouchPointStates(te), GetTouchEventType(te), GetTouchDeviceType(te));
+    mitk::TouchEvent::New(mitk::RenderWindowBase::GetRenderer(), GetEventState(te),
+    GetTouchDeviceType(te), GetTouchPointPositions(te), GetTouchPointStates(te));
 
-  mitk::RenderWindowBase::HandleEvent(touchEvent.GetPointer());
+  mitk::GestureEvent::Pointer gestureEvent = m_GestureManager.CheckForGesture(touchEvent);
+  if (gestureEvent.IsNotNull())
+  {
+    mitk::RenderWindowBase::HandleEvent(gestureEvent);
+  }
 
   QVTKQuickItem::touchEvent(te);
 }

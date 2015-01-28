@@ -18,31 +18,21 @@
 #include "mitkTouchEvent.h"
 
 mitk::TouchEvent::TouchEvent(mitk::BaseRenderer* baseRenderer,
+   EventState eventState,
+   TouchDeviceType devType,
    const std::list<Point2D>& touchPointPositions,
-   const std::list<TouchPointState>& touchPointStates,
-   TouchEventType eventType,
-   TouchDeviceType devType)
+   const std::list<TouchPointState>& touchPointStates)
 : InteractionEvent(baseRenderer)
 , m_DeviceType(devType)
-, m_EventType(eventType)
+, m_EventState(eventState)
 , m_TouchPointPositions( touchPointPositions)
 , m_TouchPointStates( touchPointStates)
 {
 }
 
-mitk::InteractionEvent::TouchEventType  mitk::TouchEvent::GetEventType() const
+void  mitk::TouchEvent::SetEventState(mitk::InteractionEvent::EventState type)
 {
-   return m_EventType;
-}
-
-mitk::InteractionEvent::TouchDeviceType  mitk::TouchEvent::GetDeviceType() const
-{
-   return m_DeviceType;
-}
-
-void  mitk::TouchEvent::SetEventType(mitk::InteractionEvent::TouchEventType type)
-{
-   m_EventType = type;
+   m_EventState = type;
 }
 
 void  mitk::TouchEvent::SetDeviceType(mitk::InteractionEvent::TouchDeviceType devType)
@@ -85,7 +75,7 @@ bool mitk::TouchEvent::IsEqual(const mitk::InteractionEvent& interactionEvent) c
 {
   const mitk::TouchEvent& mpe = static_cast<const mitk::TouchEvent&>(interactionEvent);
   return (this->GetDeviceType() == mpe.GetDeviceType() &&
-          this->GetEventType() == mpe.GetEventType() &&
+          this->GetEventState() == mpe.GetEventState() &&
           Superclass::IsEqual(interactionEvent));
 }
 

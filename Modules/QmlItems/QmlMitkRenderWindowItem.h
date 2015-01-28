@@ -22,6 +22,8 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkRenderWindowBase.h"
 
 #include <QTimer>
+#include "mitkGestureManager.h"
+#include "qgesturerecognizer.h"
 
 #include "MitkQmlItemsExports.h"
 
@@ -82,7 +84,7 @@ protected:
   mitk::InteractionEvent::TouchPointState GetTouchPointState(QTouchEvent::TouchPoint* tp) const;
   std::list<mitk::InteractionEvent::TouchPointState> GetTouchPointStates(QTouchEvent* te) const;
   mitk::InteractionEvent::TouchDeviceType GetTouchDeviceType(QTouchEvent* te) const;
-  mitk::InteractionEvent::TouchEventType GetTouchEventType(QTouchEvent* te) const;
+  mitk::InteractionEvent::EventState GetEventState(QTouchEvent* te) const;
 
   virtual void mousePressEvent(QMouseEvent* e);
   virtual void mouseReleaseEvent(QMouseEvent* e);
@@ -100,12 +102,15 @@ private:
     mitk::BaseRenderer::MapperSlotId m_MapperID;
     mitk::SliceNavigationController::ViewDirection m_ViewDirection;
 
+    mitk::GestureManager m_GestureManager;
 
     QTimer m_Animation;
 
     vtkSmartPointer<vtkEventQtSlotConnect> m_connect;
 
     static QMap<vtkRenderWindow*, QmlMitkRenderWindowItem*>& GetInstances();
+
+    //QGestureManager m_GestureManager;
 
 };
 

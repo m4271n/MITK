@@ -66,7 +66,7 @@ namespace mitk
     /**
     * Touch and TouchPoint state values and touch device types
     */
-    enum TouchEventType
+    enum EventState
     {
        Begin = 0x0000,
        Update = 0x1000,
@@ -166,6 +166,39 @@ namespace mitk
   inline InteractionEvent::ModifierKeys& operator|=(InteractionEvent::ModifierKeys& a, InteractionEvent::ModifierKeys& b)
   {
     a = static_cast<InteractionEvent::ModifierKeys>(static_cast<int>(a) | static_cast<int>(b));
+    return a;
+  }
+
+  inline InteractionEvent::EventState operator|(InteractionEvent::EventState a, InteractionEvent::EventState b)
+  {
+    return static_cast<InteractionEvent::EventState>(static_cast<int>(a) | static_cast<int>(b));
+  }
+
+  inline InteractionEvent::EventState& operator|=(InteractionEvent::EventState& a, InteractionEvent::EventState& b)
+  {
+    a = static_cast<InteractionEvent::EventState>(static_cast<int>(a) | static_cast<int>(b));
+    return a;
+  }
+
+  inline InteractionEvent::TouchPointState operator|(InteractionEvent::TouchPointState a, InteractionEvent::TouchPointState b)
+  {
+    return static_cast<InteractionEvent::TouchPointState>(static_cast<int>(a) | static_cast<int>(b));
+  }
+
+  inline InteractionEvent::TouchPointState& operator|=(InteractionEvent::TouchPointState& a, InteractionEvent::TouchPointState& b)
+  {
+    a = static_cast<InteractionEvent::TouchPointState>(static_cast<int>(a) | static_cast<int>(b));
+    return a;
+  }
+
+  inline InteractionEvent::TouchDeviceType operator|(InteractionEvent::TouchDeviceType a, InteractionEvent::TouchDeviceType b)
+  {
+    return static_cast<InteractionEvent::TouchDeviceType>(static_cast<int>(a) | static_cast<int>(b));
+  }
+
+  inline InteractionEvent::TouchDeviceType& operator|=(InteractionEvent::TouchDeviceType& a, InteractionEvent::TouchDeviceType& b)
+  {
+    a = static_cast<InteractionEvent::TouchDeviceType>(static_cast<int>(a) | static_cast<int>(b));
     return a;
   }
 

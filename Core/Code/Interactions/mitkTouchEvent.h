@@ -35,13 +35,14 @@ namespace mitk
 
   public:
     mitkClassMacro(TouchEvent,InteractionEvent)
-    mitkNewMacro5Param(Self, BaseRenderer*, const std::list<Point2D>&, const std::list<TouchPointState>&, TouchEventType, TouchDeviceType)
+    mitkNewMacro5Param(Self, BaseRenderer*, EventState, TouchDeviceType,
+    const std::list<Point2D>&, const std::list<TouchPointState>&)
+    mitkNewMacro3Param(Self, BaseRenderer*, EventState, TouchDeviceType)
 
-    TouchEventType GetEventType() const;
-    TouchDeviceType GetDeviceType() const;
-    void SetEventType(TouchEventType type);
+    itkGetConstMacro(EventState, EventState);
+    itkGetConstMacro(DeviceType, TouchDeviceType);
+    void SetEventState(EventState state);
     void SetDeviceType(TouchDeviceType devType);
-    //TouchPointState GetTouchPointState() const;
     void GetTouchPointStates(std::list<TouchPointState>&) const;
     void SetTouchPointStates(const std::list<TouchPointState>& tpStates);
     const std::list<Point2D>& GetTouchPointPositionsOnScreen() const;
@@ -49,15 +50,15 @@ namespace mitk
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
-    TouchEvent(BaseRenderer*, const std::list<Point2D>& = std::list<Point2D>(),
-      const std::list<TouchPointState>& = std::list<TouchPointState>(),
-      TouchEventType eventType = Begin, TouchDeviceType devType = TouchScreen);
+    TouchEvent(BaseRenderer*, EventState eventState = Begin, TouchDeviceType devType = TouchScreen,
+      const std::list<Point2D>& = std::list<Point2D>(),
+      const std::list<TouchPointState>& = std::list<TouchPointState>());
     virtual ~TouchEvent();
 
     virtual bool IsEqual(const InteractionEvent&) const;
 
   private:
-    TouchEventType m_EventType;
+    EventState m_EventState;
     TouchDeviceType m_DeviceType;
     const std::list<TouchPointState>  m_TouchPointStates;
     const std::list<Point2D>  m_TouchPointPositions;

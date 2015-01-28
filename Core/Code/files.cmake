@@ -251,6 +251,7 @@ set(CPP_FILES
   Interactions/mitkEventMapper.cpp
   Interactions/mitkEventRecorder.cpp
   Interactions/mitkEventStateMachine.cpp
+  Interactions/mitkGestureEvent.cpp
   Interactions/mitkGlobalInteraction.cpp
   Interactions/mitkInteractor.cpp
   Interactions/mitkInternalEvent.cpp
@@ -267,6 +268,7 @@ set(CPP_FILES
   Interactions/mitkMouseMovePointSetInteractor.cpp
   Interactions/mitkMoveBaseDataInteractor.cpp
   Interactions/mitkNodeDepententPointSetInteractor.cpp
+  Interactions/mitkPanGestureEvent.cpp
   Interactions/mitkPointSetDataInteractor.cpp
   Interactions/mitkPointSetInteractor.cpp
   Interactions/mitkPositionEvent.cpp
@@ -281,6 +283,7 @@ set(CPP_FILES
   Interactions/mitkStateEvent.cpp
   Interactions/mitkStateMachine.cpp
   Interactions/mitkStateMachineFactory.cpp
+  Interactions/mitkTouchEvent.cpp
   Interactions/mitkTransition.cpp
   Interactions/mitkWheelEvent.cpp
   Interactions/mitkKeyEvent.cpp
@@ -288,7 +291,6 @@ set(CPP_FILES
   Interactions/mitkVtkInteractorStyle.cxx
   Interactions/mitkCrosshairPositionEvent.cpp
   Interactions/mitkXML2EventParser.cpp
-  Interactions/mitkTouchEvent.cpp
 
   Interfaces/mitkInteractionEventObserver.cpp
   Interfaces/mitkIShaderRepository.cpp

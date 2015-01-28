@@ -162,4 +162,28 @@ const std::string InteractionEventConst::xmlEventPropertyMapperID()
   return xmlEventPropertyMapperID;
 }
 
+const std::string InteractionEventConst::xmlEventPropertyGestureRating()
+{
+  static const std::string xmlEventPropertyGestureRating = "GestureRating";
+  return xmlEventPropertyGestureRating;
+}
+
+const std::string InteractionEventConst::xmlEventPropertyEventState()
+{
+  static const std::string xmlEventPropertyEventState = "EventState";
+  return xmlEventPropertyEventState;
+}
+
+const std::string InteractionEventConst::xmlEventPropertyTouchDeviceType()
+{
+  static const std::string xmlEventPropertyTouchDeviceType = "TouchDeviceType";
+  return xmlEventPropertyTouchDeviceType;
+}
+
+const std::string InteractionEventConst::xmlEventPropertyTouchPointPositionsOnScreen()
+{
+  static const std::string xmlEventPropertyTouchPointPositionsOnScreen = "TouchPointPositionsOnScreen";
+  return xmlEventPropertyTouchPointPositionsOnScreen;
+}
+
 }

@@ -41,6 +41,7 @@ void mitk::DisplayInteractor::ConnectActionsAndFunctions()
 
   CONNECT_FUNCTION("init", Init);
   CONNECT_FUNCTION("move", Move);
+  //CONNECT_FUNCTION("gestureMove", GestureMove);
   CONNECT_FUNCTION("zoom", Zoom);
   CONNECT_FUNCTION("scroll", Scroll);
   CONNECT_FUNCTION("ScrollOneDown", ScrollOneDown);
