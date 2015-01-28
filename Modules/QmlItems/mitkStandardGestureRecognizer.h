@@ -27,6 +27,32 @@ See LICENSE.txt or http://www.mitk.org for details.
 namespace mitk
 {
   /**
+  *  \brief a recognizer class for one finger taps
+  */
+  class MitkQmlItems_EXPORT TapGestureRecognizer : public GestureRecognizer
+  {
+
+  public:
+    mitkClassMacro(TapGestureRecognizer, GestureRecognizer);
+    mitkNewMacro1Param(Self, BaseRenderer*)
+
+      //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
+      virtual GestureEvent::Pointer Recognize(InteractionEvent* e, GestureState& s);
+    virtual void Reset();
+
+  protected:
+    TapGestureRecognizer(BaseRenderer*);
+    virtual ~TapGestureRecognizer();
+
+  private:
+    //Point2D m_StartPos_TP1;
+    //Point2D m_StartPos_TP2;
+    //Point2D m_LastOffset;
+    Point2D m_StartPos;
+  };
+
+
+  /**
   *  \brief
   */
   class MitkQmlItems_EXPORT PanGestureRecognizer : public GestureRecognizer
@@ -34,14 +60,15 @@ namespace mitk
 
   public:
     mitkClassMacro(PanGestureRecognizer, GestureRecognizer);
-    itkFactorylessNewMacro(Self)
+    //itkFactorylessNewMacro(Self)
+    mitkNewMacro1Param(Self, BaseRenderer*)
 
-    virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
-    virtual GestureEvent::GestureRating Recognize(InteractionEvent* e, GestureEvent* g);
+    //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
+    virtual GestureEvent::Pointer Recognize(InteractionEvent* e);
     virtual void Reset();
 
   protected:
-    PanGestureRecognizer();
+    PanGestureRecognizer(BaseRenderer*);
     virtual ~PanGestureRecognizer();
 
   private:

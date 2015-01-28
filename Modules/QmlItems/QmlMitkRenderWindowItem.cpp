@@ -119,7 +119,7 @@ void QmlMitkRenderWindowItem::init()
     m_DataStorage->Add( planeNode, m_PlaneNodeParent );
   }
 
-  m_GestureManager.SetRenderer(this->GetRenderer());
+  m_GestureManager = mitk::GestureManager::New(this->GetRenderer());
 }
 
 void QmlMitkRenderWindowItem::InitView( mitk::BaseRenderer::MapperSlotId mapperID,
@@ -335,19 +335,19 @@ void QmlMitkRenderWindowItem::mousePressEvent(QMouseEvent* me)
   mitk::MousePressEvent::Pointer mPressEvent =
     mitk::MousePressEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
 
-#if defined INTERACTION_LEGACY
-  bool modernInteractorHandledEvent =
-#endif
-  mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
-#if defined INTERACTION_LEGACY
-  if (!modernInteractorHandledEvent)
-  {
-    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-    mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
-  }
-#endif
-
-  QVTKQuickItem::mousePressEvent(me);
+//#if defined INTERACTION_LEGACY
+//  bool modernInteractorHandledEvent =
+//#endif
+//  mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
+//#if defined INTERACTION_LEGACY
+//  if (!modernInteractorHandledEvent)
+//  {
+//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+//    mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
+//  }
+//#endif
+//
+//  QVTKQuickItem::mousePressEvent(me);
 
 //  if (m_ResendQtEvents)
 //    me->ignore();
@@ -360,19 +360,19 @@ void QmlMitkRenderWindowItem::mouseReleaseEvent(QMouseEvent* me)
   mitk::MouseReleaseEvent::Pointer mReleaseEvent =
     mitk::MouseReleaseEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
 
-#if defined INTERACTION_LEGACY
-  bool modernInteractorHandledEvent =
-#endif
-  mitk::RenderWindowBase::HandleEvent(mReleaseEvent.GetPointer());
-#if defined INTERACTION_LEGACY
-  if (!modernInteractorHandledEvent)
-  {
-    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-    mitk::RenderWindowBase::mouseReleaseMitkEvent(&myevent);
-  }
-#endif
-
-  QVTKQuickItem::mouseReleaseEvent(me);
+//#if defined INTERACTION_LEGACY
+//  bool modernInteractorHandledEvent =
+//#endif
+//  mitk::RenderWindowBase::HandleEvent(mReleaseEvent.GetPointer());
+//#if defined INTERACTION_LEGACY
+//  if (!modernInteractorHandledEvent)
+//  {
+//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+//    mitk::RenderWindowBase::mouseReleaseMitkEvent(&myevent);
+//  }
+//#endif
+//
+//  QVTKQuickItem::mouseReleaseEvent(me);
 
 //  if (m_ResendQtEvents)
 //    me->ignore();
@@ -385,17 +385,17 @@ void QmlMitkRenderWindowItem::mouseMoveEvent(QMouseEvent* me)
   mitk::MouseMoveEvent::Pointer mMoveEvent =
     mitk::MouseMoveEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me));
 
-#if defined INTERACTION_LEGACY
-  bool modernInteractorHandledEvent =
-#endif
-  mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
-#if defined INTERACTION_LEGACY
-  if (!modernInteractorHandledEvent)
-  {
-    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
-  }
-#endif
+//#if defined INTERACTION_LEGACY
+//  bool modernInteractorHandledEvent =
+//#endif
+//  mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
+//#if defined INTERACTION_LEGACY
+//  if (!modernInteractorHandledEvent)
+//  {
+//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+//    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
+//  }
+//#endif
 
   QVTKQuickItem::mouseMoveEvent(me);
 
@@ -435,7 +435,7 @@ void QmlMitkRenderWindowItem::touchEvent(QTouchEvent* te)
     mitk::TouchEvent::New(mitk::RenderWindowBase::GetRenderer(), GetEventState(te),
     GetTouchDeviceType(te), GetTouchPointPositions(te), GetTouchPointStates(te));
 
-  mitk::GestureEvent::Pointer gestureEvent = m_GestureManager.CheckForGesture(touchEvent);
+  mitk::GestureEvent::Pointer gestureEvent = m_GestureManager->CheckForGesture(touchEvent);
   if (gestureEvent.IsNotNull())
   {
     mitk::RenderWindowBase::HandleEvent(gestureEvent);

@@ -72,7 +72,8 @@ namespace mitk
      */
     virtual bool FilterEvents(InteractionEvent* interactionEvent, DataNode* dataNode);
 
-    virtual bool CheckPositionEvent( const InteractionEvent* interactionEvent );
+    virtual bool CheckPositionEvent(const InteractionEvent* interactionEvent);
+    virtual bool CheckGestureEvent(const InteractionEvent* interactionEvent);
 
     /**
      * \brief Initializes an interaction, saves the pointers start position for further reference.
@@ -82,6 +83,10 @@ namespace mitk
      * \brief Performs panning of the data set in the render window.
      */
     virtual bool Move(StateMachineAction*, InteractionEvent*);
+    /**
+    * \brief Performs panning of the data set in the render window.
+    */
+    virtual bool GestureMove(StateMachineAction*, InteractionEvent*);
     /**
      * \brief Performs zooming relative to mouse/pointer movement.
      *

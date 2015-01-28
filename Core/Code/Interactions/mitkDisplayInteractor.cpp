@@ -17,6 +17,7 @@
 #include "mitkDisplayInteractor.h"
 #include "mitkBaseRenderer.h"
 #include "mitkInteractionPositionEvent.h"
+#include "mitkGestureEvent.h"
 #include "mitkPropertyList.h"
 #include <string.h>
 // level window
@@ -38,10 +39,11 @@ void mitk::DisplayInteractor::Notify(InteractionEvent* interactionEvent, bool is
 void mitk::DisplayInteractor::ConnectActionsAndFunctions()
 {
   CONNECT_CONDITION( "check_position_event", CheckPositionEvent );
+  CONNECT_CONDITION( "check_gesture_event", CheckGestureEvent );
 
   CONNECT_FUNCTION("init", Init);
   CONNECT_FUNCTION("move", Move);
-  //CONNECT_FUNCTION("gestureMove", GestureMove);
+  CONNECT_FUNCTION("gestureMove", GestureMove);
   CONNECT_FUNCTION("zoom", Zoom);
   CONNECT_FUNCTION("scroll", Scroll);
   CONNECT_FUNCTION("ScrollOneDown", ScrollOneDown);
@@ -79,6 +81,17 @@ bool mitk::DisplayInteractor::CheckPositionEvent( const InteractionEvent* intera
   return true;
 }
 
+bool mitk::DisplayInteractor::CheckGestureEvent(const InteractionEvent* interactionEvent)
+{
+  const GestureEvent* gEvent = dynamic_cast<const GestureEvent*>(interactionEvent);
+  if (gEvent == NULL)
+  {
+    return false;
+  }
+
+  return true;
+}
+
 bool mitk::DisplayInteractor::Init(StateMachineAction*, InteractionEvent* interactionEvent)
 {
   BaseRenderer* sender = interactionEvent->GetSender();
@@ -100,15 +113,33 @@ bool mitk::DisplayInteractor::Move(StateMachineAction*, InteractionEvent* intera
   InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
 
   float invertModifier = -1.0;
-  if ( m_InvertMoveDirection )
+  if (m_InvertMoveDirection)
   {
     invertModifier = 1.0;
   }
 
   // perform translation
-  sender->GetDisplayGeometry()->MoveBy( (positionEvent->GetPointerPositionOnScreen() - m_LastDisplayCoordinate) * invertModifier );
+  sender->GetDisplayGeometry()->MoveBy((positionEvent->GetPointerPositionOnScreen() - m_LastDisplayCoordinate) * invertModifier);
   sender->GetRenderingManager()->RequestUpdate(sender->GetRenderWindow());
   m_LastDisplayCoordinate = positionEvent->GetPointerPositionOnScreen();
+  return true;
+}
+
+bool mitk::DisplayInteractor::GestureMove(StateMachineAction*, InteractionEvent* interactionEvent)
+{
+  //BaseRenderer* sender = interactionEvent->GetSender();
+  //InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
+
+  //float invertModifier = -1.0;
+  //if ( m_InvertMoveDirection )
+  //{
+  //  invertModifier = 1.0;
+  //}
+
+  //// perform translation
+  //sender->GetDisplayGeometry()->MoveBy( (positionEvent->GetPointerPositionOnScreen() - m_LastDisplayCoordinate) * invertModifier );
+  //sender->GetRenderingManager()->RequestUpdate(sender->GetRenderWindow());
+  //m_LastDisplayCoordinate = positionEvent->GetPointerPositionOnScreen();
   return true;
 }
 

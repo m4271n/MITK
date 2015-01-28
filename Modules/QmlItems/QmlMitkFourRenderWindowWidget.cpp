@@ -1,4 +1,3 @@
-
 #include "QmlMitkFourRenderWindowWidget.h"
 
 #include "mitkDisplayInteractor.h"
@@ -10,16 +9,16 @@
 #include <stdexcept>
 
 QmlMitkFourRenderWindowWidget::QmlMitkFourRenderWindowWidget(QQuickItem* parent)
-: QQuickItem(parent)
-, m_ChildrenContainer(NULL)
-, m_RenderItemAxial(NULL)
-, m_RenderItemSagittal(NULL)
-, m_RenderItemFrontal(NULL)
-, m_RenderItem3D(NULL)
+  : QQuickItem(parent)
+  , m_ChildrenContainer(NULL)
+  , m_RenderItemAxial(NULL)
+  , m_RenderItemSagittal(NULL)
+  , m_RenderItemFrontal(NULL)
+  , m_RenderItem3D(NULL)
 {
   QQmlEngine engine;
   QQmlComponent component(&engine, QUrl("qrc:///MITK/Modules/QmlMitk/QmlMitkFourRenderWindowWidget.qml"));
-  m_ChildrenContainer = qobject_cast<QQuickItem*>( component.create() );
+  m_ChildrenContainer = qobject_cast<QQuickItem*>(component.create());
 
   if (m_ChildrenContainer)
   {
@@ -42,7 +41,7 @@ QmlMitkFourRenderWindowWidget::~QmlMitkFourRenderWindowWidget()
   }
 }
 
-void QmlMitkFourRenderWindowWidget::SetupWidget( QQuickItem* parent )
+void QmlMitkFourRenderWindowWidget::SetupWidget(QQuickItem* parent)
 {
   m_RenderItemAxial = parent->findChild<QmlMitkRenderWindowItem*>("mitkRenderItemAxial");
   m_RenderItemSagittal = parent->findChild<QmlMitkRenderWindowItem*>("mitkRenderItemSagittal");
@@ -51,17 +50,17 @@ void QmlMitkFourRenderWindowWidget::SetupWidget( QQuickItem* parent )
 
   if (m_RenderItemAxial && m_RenderItemSagittal && m_RenderItemFrontal && m_RenderItem3D)
   {
-    m_RenderItemAxial->GetRenderer()->SetMapperID( mitk::BaseRenderer::Standard2D );
-    m_RenderItemAxial->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection( mitk::SliceNavigationController::Axial );
+    m_RenderItemAxial->GetRenderer()->SetMapperID(mitk::BaseRenderer::Standard2D);
+    m_RenderItemAxial->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection(mitk::SliceNavigationController::Axial);
 
-    m_RenderItemSagittal->GetRenderer()->SetMapperID( mitk::BaseRenderer::Standard2D );
-    m_RenderItemSagittal->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection( mitk::SliceNavigationController::Sagittal );
+    m_RenderItemSagittal->GetRenderer()->SetMapperID(mitk::BaseRenderer::Standard2D);
+    m_RenderItemSagittal->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection(mitk::SliceNavigationController::Sagittal);
 
-    m_RenderItemFrontal->GetRenderer()->SetMapperID( mitk::BaseRenderer::Standard2D );
-    m_RenderItemFrontal->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection( mitk::SliceNavigationController::Frontal );
+    m_RenderItemFrontal->GetRenderer()->SetMapperID(mitk::BaseRenderer::Standard2D);
+    m_RenderItemFrontal->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection(mitk::SliceNavigationController::Frontal);
 
-    m_RenderItem3D->GetRenderer()->SetMapperID( mitk::BaseRenderer::Standard3D );
-    m_RenderItem3D->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection( mitk::SliceNavigationController::Original );
+    m_RenderItem3D->GetRenderer()->SetMapperID(mitk::BaseRenderer::Standard3D);
+    m_RenderItem3D->GetRenderer()->GetSliceNavigationController()->SetDefaultViewDirection(mitk::SliceNavigationController::Original);
 
     InitializeMoveZoomInteraction();
   }
@@ -74,29 +73,27 @@ void QmlMitkFourRenderWindowWidget::InitializeMoveZoomInteraction()
   m_ZoomScroller->SetEventConfig("DisplayConfigMITK.xml");
 
   us::ModuleContext* context = us::GetModuleContext();
-  context->RegisterService<mitk::InteractionEventObserver>( m_ZoomScroller.GetPointer() );
+  context->RegisterService<mitk::InteractionEventObserver>(m_ZoomScroller.GetPointer());
 }
 
-
-void QmlMitkFourRenderWindowWidget::SetDataStorage( mitk::DataStorage::Pointer storage )
+void QmlMitkFourRenderWindowWidget::SetDataStorage(mitk::DataStorage::Pointer storage)
 {
   m_DataStorage = storage;
 
   // TODO file bug: planes rendering 2D REQUIRES a parent node for all plane geometries! the mapper should just not care if it cannot find others!
   // TODO make this conditional, only add if not yet preset...
   mitk::DataNode::Pointer planesNodeParent = mitk::DataNode::New();
-  m_DataStorage->Add( planesNodeParent );
+  m_DataStorage->Add(planesNodeParent);
 
-  m_RenderItemAxial->SetPlaneNodeParent( planesNodeParent );
-  m_RenderItemAxial->GetRenderer()->SetDataStorage( m_DataStorage );
+  m_RenderItemAxial->SetPlaneNodeParent(planesNodeParent);
+  m_RenderItemAxial->GetRenderer()->SetDataStorage(m_DataStorage);
 
-  m_RenderItemSagittal->SetPlaneNodeParent( planesNodeParent );
-  m_RenderItemSagittal->GetRenderer()->SetDataStorage( m_DataStorage );
+  m_RenderItemSagittal->SetPlaneNodeParent(planesNodeParent);
+  m_RenderItemSagittal->GetRenderer()->SetDataStorage(m_DataStorage);
 
-  m_RenderItemFrontal->SetPlaneNodeParent( planesNodeParent );
-  m_RenderItemFrontal->GetRenderer()->SetDataStorage( m_DataStorage );
+  m_RenderItemFrontal->SetPlaneNodeParent(planesNodeParent);
+  m_RenderItemFrontal->GetRenderer()->SetDataStorage(m_DataStorage);
 
-  m_RenderItem3D->SetPlaneNodeParent( planesNodeParent );
-  m_RenderItem3D->GetRenderer()->SetDataStorage( m_DataStorage );
+  m_RenderItem3D->SetPlaneNodeParent(planesNodeParent);
+  m_RenderItem3D->GetRenderer()->SetDataStorage(m_DataStorage);
 }
-

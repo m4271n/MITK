@@ -275,6 +275,8 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
   InteractionEvent::EventState gestureState = InteractionEvent::Begin;
   std::string strTouchDeviceType;
   InteractionEvent::TouchDeviceType touchDeviceType = InteractionEvent::TouchScreen;
+  std::string strGestureType;
+  GestureEvent::GestureType gestureType = GestureEvent::Undefined;
 
   Point2D pos;
   pos.Fill(0);
@@ -416,23 +418,23 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
       std::transform((*it).begin(), (*it).end(), (*it).begin(), ::toupper);
       if (*it == "IGNORE")
       {
-        gestureRating = gestureRating | GestureEvent::Ignore;
+        gestureRating = /*gestureRating | */GestureEvent::Ignore;
       }
       else if (*it == "MAYBEGESTURE")
       {
-        gestureRating = gestureRating | GestureEvent::MayBeGesture;
+        gestureRating = /*gestureRating | */GestureEvent::MayBeGesture;
       }
       else if (*it == "TRIGGERGESTURE")
       {
-        gestureRating = gestureRating | GestureEvent::TriggerGesture;
+        gestureRating = /*gestureRating | */GestureEvent::TriggerGesture;
       }
       else if (*it == "FINISHGESTURE")
       {
-        gestureRating = gestureRating | GestureEvent::FinishGesture;
+        gestureRating = /*gestureRating | */GestureEvent::FinishGesture;
       }
       else if (*it == "CANCELGESTURE")
       {
-        gestureRating = gestureRating | GestureEvent::CancelGesture;
+        gestureRating = /*gestureRating | */GestureEvent::CancelGesture;
       }
       else
       {
@@ -485,6 +487,72 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
       else
       {
         MITK_WARN << "mitkEventFactory: Invalid touch device type in config file:" << (*it);
+      }
+    }
+  }
+
+  // Parse gesture type
+  if (list->GetStringProperty(InteractionEventConst::xmlEventPropertyGestureType().c_str(), strGestureType))
+  {
+    std::vector<std::string> mods = split(strGestureType, ',');
+    for (std::vector<std::string>::iterator it = mods.begin(); it != mods.end(); ++it)
+    {
+      std::transform((*it).begin(), (*it).end(), (*it).begin(), ::toupper);
+      if (*it == "TAP")
+      {
+        gestureType =  GestureEvent::Tap;
+      }
+      else if (*it == "DOUBLETAP")
+      {
+        gestureType =  GestureEvent::DoubleTap;
+      }
+      else if (*it == "LONGPRESS")
+      {
+        gestureType =  GestureEvent::LongPress;
+      }
+      else if (*it == "SCROLL")
+      {
+        gestureType =  GestureEvent::Scroll;
+      }
+      else if (*it == "PAN")
+      {
+        gestureType =  GestureEvent::Pan;
+      }
+      else if (*it == "FLICK")
+      {
+        gestureType =  GestureEvent::Flick;
+      }
+      else if (*it == "TWOFINGERTAP")
+      {
+        gestureType =  GestureEvent::TwoFingerTap;
+      }
+      else if (*it == "TWOFINGERSCROLL")
+      {
+        gestureType =  GestureEvent::TwoFingerScroll;
+      }
+      else if (*it == "TWOFINGERPAN")
+      {
+        gestureType = GestureEvent::TwoFingerPan;
+      }
+      else if (*it == "PINCHZOOM")
+      {
+        gestureType =  GestureEvent::PinchZoom;
+      }
+      else if (*it == "UNDEFINED")
+      {
+        gestureType =  GestureEvent::Undefined;
+      }
+      else if (*it == "ROTATE")
+      {
+        gestureType =  GestureEvent::Rotate;
+      }
+      else if (*it == "CUSTOM")
+      {
+        gestureType =  GestureEvent::Custom;
+      }
+      else
+      {
+        MITK_WARN << "mitkEventFactory: Invalid event gesture type in config file:" << (*it);
       }
     }
   }
@@ -574,6 +642,18 @@ mitk::InteractionEvent::Pointer mitk::EventFactory::CreateEvent(PropertyList::Po
   else if (eventClass == "GESTUREEVENT")
   {
     event = GestureEvent::New(renderer, gestureRating, gestureState);
+  }
+  else if (eventClass == "GESTUREBEGINEVENT")
+  {
+    event = GestureBeginEvent::New(renderer, gestureRating, gestureState, gestureType);
+  }
+  else if (eventClass == "GESTUREUPDATEEVENT")
+  {
+    event = GestureUpdateEvent::New(renderer, gestureRating, gestureState, gestureType);
+  }
+  else if (eventClass == "GESTUREENDEVENT")
+  {
+    event = GestureEndEvent::New(renderer, gestureRating, gestureState, gestureType);
   }
   else if (eventClass == "PANGESTUREEVENT")
   {

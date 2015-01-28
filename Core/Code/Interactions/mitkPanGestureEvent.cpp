@@ -33,9 +33,7 @@ mitk::PanGestureEvent::~PanGestureEvent()
 bool mitk::PanGestureEvent::IsEqual(const mitk::InteractionEvent& interactionEvent) const
 {
   const mitk::PanGestureEvent& mpe = static_cast<const mitk::PanGestureEvent&>(interactionEvent);
-  return (this->GetOffset() == mpe.GetOffset() &&
-          this->GetLastOffset() == mpe.GetLastOffset() &&
-          Superclass::IsEqual(interactionEvent));
+  return Superclass::IsEqual(interactionEvent);
 }
 
 bool mitk::PanGestureEvent::IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const

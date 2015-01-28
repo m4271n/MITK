@@ -102,7 +102,7 @@ private:
     mitk::BaseRenderer::MapperSlotId m_MapperID;
     mitk::SliceNavigationController::ViewDirection m_ViewDirection;
 
-    mitk::GestureManager m_GestureManager;
+    mitk::GestureManager::Pointer m_GestureManager;
 
     QTimer m_Animation;
 

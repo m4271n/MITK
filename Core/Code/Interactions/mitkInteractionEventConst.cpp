@@ -180,6 +180,12 @@ const std::string InteractionEventConst::xmlEventPropertyTouchDeviceType()
   return xmlEventPropertyTouchDeviceType;
 }
 
+const std::string InteractionEventConst::xmlEventPropertyGestureType()
+{
+  static const std::string xmlEventPropertyGestureType = "GestureType";
+  return xmlEventPropertyGestureType;
+}
+
 const std::string InteractionEventConst::xmlEventPropertyTouchPointPositionsOnScreen()
 {
   static const std::string xmlEventPropertyTouchPointPositionsOnScreen = "TouchPointPositionsOnScreen";

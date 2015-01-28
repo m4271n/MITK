@@ -18,9 +18,82 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkTouchEvent.h"
 #include "mitkPanGestureEvent.h"
 
+mitk::TapGestureRecognizer::TapGestureRecognizer(BaseRenderer* ren)
+  : GestureRecognizer(ren)
+{
+}
 
-mitk::PanGestureRecognizer::PanGestureRecognizer()
-: GestureRecognizer()
+mitk::TapGestureRecognizer::~TapGestureRecognizer()
+{
+
+}
+
+mitk::GestureEvent::Pointer
+mitk::TapGestureRecognizer::Recognize(mitk::InteractionEvent* e, GestureState& state)
+{
+  //mitk::GestureEvent::GestureRating result = mitk::GestureEvent::CancelGesture;
+
+  //todo add a check for touch type
+  mitk::TouchEvent* te = dynamic_cast<mitk::TouchEvent*>(e);
+
+  if (te == NULL)
+  {
+    return NULL;
+  }
+
+  std::list<mitk::Point2D> touchPoints = te->GetTouchPointPositionsOnScreen();
+  mitk::InteractionEvent::EventState gestureState = te->GetEventState();
+  mitk::GestureEvent::Pointer g =
+    this->Create(m_Renderer, gestureState, mitk::GestureEvent::Tap);
+
+  switch (gestureState)
+  {
+  case mitk::InteractionEvent::EventState::Begin:
+  {
+    if (touchPoints.size() == 1)
+    {
+      result = mitk::GestureRecognizer::TriggerGesture;
+      m_StartPos = touchPoints.front();
+      g->SetHotspot(m_StartPos);
+    }
+    break;
+  }
+  case mitk::InteractionEvent::EventState::Update:
+  {
+    double delta =
+      (m_StartPos[0] - touchPoints.front()[0]) + (m_StartPos[1] - touchPoints.front()[1]);
+    if (delta <= /*tapradius*/ 40)
+    {
+      result = mitk::GestureRecognizer::TriggerGesture;
+    }
+    break;
+  }
+  case mitk::InteractionEvent::EventState::End:
+  {
+    double delta =
+      (m_StartPos[0] - touchPoints.front()[0]) + (m_StartPos[1] - touchPoints.front()[1]);
+    if (delta <= /*tapradius*/ 40)
+    {
+      result = mitk::GestureRecognizer::FinishGesture;
+    }
+    break;
+  }
+  default:
+    result = mitk::GestureRecognizer::Ignore;
+    break;
+  }
+  g->SetGestureRating(result);
+  g->SetGestureState(te->GetEventState());
+  return g;
+}
+
+void mitk::TapGestureRecognizer::Reset()
+{
+
+}
+
+mitk::PanGestureRecognizer::PanGestureRecognizer(BaseRenderer* ren)
+: GestureRecognizer(ren)
 {
 }
 
@@ -30,28 +103,25 @@ mitk::PanGestureRecognizer::~PanGestureRecognizer()
 }
 
 mitk::GestureEvent::Pointer
-mitk::PanGestureRecognizer::Create(mitk::BaseRenderer* renderer)
-{
-  return static_cast<mitk::GestureEvent*>(
-    mitk::PanGestureEvent::New(renderer, mitk::GestureEvent::Ignore));
-}
-
-mitk::GestureEvent::GestureRating
-mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e, mitk::GestureEvent* g)
+mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e)
 {
   mitk::GestureEvent::GestureRating result;
 
+  //todo add a check for touch type
   mitk::TouchEvent* te = dynamic_cast<mitk::TouchEvent*>(e);
-  mitk::PanGestureEvent* pg = dynamic_cast<mitk::PanGestureEvent*>(g);
+  //mitk::PanGestureEvent* pg = dynamic_cast<mitk::PanGestureEvent*>(g.GetPointer);
 
   if (te == NULL)
   {
-    return mitk::GestureEvent::Ignore;
+    return NULL;
   }
 
   std::list<mitk::Point2D> touchPoints = te->GetTouchPointPositionsOnScreen();
+  mitk::InteractionEvent::EventState gestureState = te->GetEventState();
+  mitk::GestureEvent::Pointer g = 
+    this->Create(m_Renderer, gestureState, mitk::GestureEvent::TwoFingerPan);
 
-  switch (te->GetEventState())
+  switch (gestureState)
   {
   case mitk::InteractionEvent::EventState::Begin:
   {
@@ -72,8 +142,8 @@ mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e, mitk::GestureEv
 
     m_Offset.Fill(0.0);
     m_LastOffset.Fill(0.0);
-    pg->SetLastOffset(m_Offset);
-    pg->SetOffset(m_Offset);
+    g->SetLastOffset(m_Offset);
+    g->SetOffset(m_Offset);
 
     break;
   }
@@ -88,10 +158,10 @@ mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e, mitk::GestureEv
         mitk::Point2D p2 = touchPoints.front();
         touchPoints.pop_front();
 
-        pg->SetLastOffset(m_Offset);
+        g->SetLastOffset(m_Offset);
         m_Offset[0] = (p1[0] - m_StartPos_TP1[0] + p2[0] - m_StartPos_TP2[0]) / 2.0;
         m_Offset[1] = (p1[1] - m_StartPos_TP1[1] + p2[1] - m_StartPos_TP2[1]) / 2.0;
-        pg->SetOffset(m_Offset);
+        g->SetOffset(m_Offset);
       }
       result = mitk::GestureEvent::FinishGesture;
     }
@@ -109,10 +179,10 @@ mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e, mitk::GestureEv
       mitk::Point2D p2 = touchPoints.front();
       touchPoints.pop_front();
 
-      pg->SetLastOffset(m_Offset);
+      g->SetLastOffset(m_Offset);
       m_Offset[0] = (p1[0] - m_StartPos_TP1[0] + p2[0] - m_StartPos_TP2[0]) / 2.0;
       m_Offset[1] = (p1[1] - m_StartPos_TP1[1] + p2[1] - m_StartPos_TP2[1]) / 2.0;
-      pg->SetOffset(m_Offset);
+      g->SetOffset(m_Offset);
       if (m_Offset[0] > 10 || m_Offset[1] > 10 || m_Offset[0] < -10 || m_Offset[1] < -10)
       {
         result = mitk::GestureEvent::TriggerGesture;
@@ -134,7 +204,7 @@ mitk::PanGestureRecognizer::Recognize(mitk::InteractionEvent* e, mitk::GestureEv
   }
   g->SetGestureRating(result);
   g->SetGestureState(te->GetEventState());
-  return result;
+  return g;
 }
 
 void mitk::PanGestureRecognizer::Reset()

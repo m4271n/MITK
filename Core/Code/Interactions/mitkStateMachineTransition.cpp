@@ -21,7 +21,7 @@
 #include "mitkInteractionEventConst.h"
 
 mitk::StateMachineTransition::StateMachineTransition(const std::string& nextStateName, const std::string& eventClass,
-                                                     const std::string& eventVariant)
+  const std::string& eventVariant)
   : m_EventClass(eventClass)
   , m_EventVariant(eventVariant)
   , m_NextStateName(nextStateName)
@@ -60,7 +60,7 @@ bool mitk::StateMachineTransition::operator ==(const StateMachineTransition& tra
     // support the type in the state machine.
     if (this->m_EventVariant == transition.m_EventVariant)
     {
-      MITK_WARN<< "Event type in Statemachine " << m_EventClass << " is not compatible to configuration class " << transition.m_EventClass;
+      MITK_WARN << "Event type in Statemachine " << m_EventClass << " is not compatible to configuration class " << transition.m_EventClass;
     }
     return false;
   }
@@ -82,9 +82,8 @@ void mitk::StateMachineTransition::AddAction(const StateMachineAction::Pointer& 
 
 void mitk::StateMachineTransition::AddCondition(const StateMachineCondition& condition)
 {
-  m_Conditions.push_back( condition );
+  m_Conditions.push_back(condition);
 }
-
 
 mitk::StateMachineState::Pointer mitk::StateMachineTransition::GetNextState() const
 {
@@ -105,7 +104,6 @@ const mitk::ConditionVectorType& mitk::StateMachineTransition::GetConditions() c
 {
   return m_Conditions;
 }
-
 
 void mitk::StateMachineTransition::SetNextState(const SpStateMachineState& nextState)
 {

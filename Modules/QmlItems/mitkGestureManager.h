@@ -33,21 +33,25 @@ namespace mitk
 
   public:
     mitkClassMacro(GestureManager, itk::Object);
-    itkFactorylessNewMacro(Self)
+    mitkNewMacro1Param(Self, BaseRenderer*)
 
-    void SetRenderer(mitk::BaseRenderer* renderer){ m_Renderer = renderer;};
+
+    void SetRenderer(BaseRenderer* renderer){ m_Renderer = renderer;};
 
     void RegisterGestureRecognizer(GestureRecognizer::Pointer recognizer);
 
     GestureEvent::Pointer CheckForGesture(InteractionEvent* e);
 
   public:
-    GestureManager();
+    GestureManager(BaseRenderer* ren);
     virtual ~GestureManager();
 
   private:
-    std::list<GestureRecognizer::Pointer> m_Recognizers;
-    mitk::BaseRenderer* m_Renderer;
+    typedef std::pair<GestureRecognizer::Pointer, GestureState> RecognizerStatePair;
+    typedef std::list<std::pair<GestureRecognizer::Pointer, GestureState>> RecognizerStatePairs;
+    std::map<GestureState, unsigned int> m_StatusMap;
+    RecognizerStatePairs m_RecognizerStatusPairs;
+    BaseRenderer* m_Renderer;
 
   };
 
