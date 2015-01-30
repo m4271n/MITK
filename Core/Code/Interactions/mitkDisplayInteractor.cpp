@@ -43,12 +43,15 @@ void mitk::DisplayInteractor::ConnectActionsAndFunctions()
 
   CONNECT_FUNCTION("init", Init);
   CONNECT_FUNCTION("move", Move);
-  CONNECT_FUNCTION("gestureMove", GestureMove);
   CONNECT_FUNCTION("zoom", Zoom);
   CONNECT_FUNCTION("scroll", Scroll);
   CONNECT_FUNCTION("ScrollOneDown", ScrollOneDown);
   CONNECT_FUNCTION("ScrollOneUp", ScrollOneUp);
   CONNECT_FUNCTION("levelWindow", AdjustLevelWindow);
+
+  CONNECT_FUNCTION("gestureInit", GestureInit);
+  CONNECT_FUNCTION("gestureMove", GestureMove);
+  CONNECT_FUNCTION("gestureZoom", GestureZoom);
 }
 
 mitk::DisplayInteractor::DisplayInteractor()
@@ -92,8 +95,27 @@ bool mitk::DisplayInteractor::CheckGestureEvent(const InteractionEvent* interact
   return true;
 }
 
+bool mitk::DisplayInteractor::GestureInit(StateMachineAction*, InteractionEvent* interactionEvent)
+{
+  cout << "GestureInit" << endl;
+  BaseRenderer* sender = interactionEvent->GetSender();
+  GestureEvent* positionEvent = static_cast<GestureEvent*>(interactionEvent);
+
+  Vector2D origin = sender->GetDisplayGeometry()->GetOriginInMM();
+  double scaleFactorMMPerDisplayUnit = sender->GetDisplayGeometry()->GetScaleFactorMMPerDisplayUnit();
+  m_StartDisplayCoordinate = positionEvent->GetStartCenterPosition();
+  m_LastDisplayCoordinate = positionEvent->GetStartCenterPosition();
+  m_CurrentDisplayCoordinate = positionEvent->GetStartCenterPosition();
+  m_StartCoordinateInMM = mitk::Point2D(
+      (origin + m_StartDisplayCoordinate.GetVectorFromOrigin() * scaleFactorMMPerDisplayUnit).GetDataPointer());
+  return true;
+}
+
+
 bool mitk::DisplayInteractor::Init(StateMachineAction*, InteractionEvent* interactionEvent)
 {
+  cout << "inti" << endl;
+
   BaseRenderer* sender = interactionEvent->GetSender();
   InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
 
@@ -109,6 +131,7 @@ bool mitk::DisplayInteractor::Init(StateMachineAction*, InteractionEvent* intera
 
 bool mitk::DisplayInteractor::Move(StateMachineAction*, InteractionEvent* interactionEvent)
 {
+  cout << "move" << endl;
   BaseRenderer* sender = interactionEvent->GetSender();
   InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
 
@@ -127,24 +150,27 @@ bool mitk::DisplayInteractor::Move(StateMachineAction*, InteractionEvent* intera
 
 bool mitk::DisplayInteractor::GestureMove(StateMachineAction*, InteractionEvent* interactionEvent)
 {
-  //BaseRenderer* sender = interactionEvent->GetSender();
-  //InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
+  cout << "GestureMove" << endl;
+  BaseRenderer* sender = interactionEvent->GetSender();
+  GestureEvent* positionEvent = static_cast<GestureEvent*>(interactionEvent);
 
-  //float invertModifier = -1.0;
-  //if ( m_InvertMoveDirection )
-  //{
-  //  invertModifier = 1.0;
-  //}
+  float invertModifier = -1.0;
+  if ( m_InvertMoveDirection )
+  {
+    invertModifier = 1.0;
+  }
 
-  //// perform translation
-  //sender->GetDisplayGeometry()->MoveBy( (positionEvent->GetPointerPositionOnScreen() - m_LastDisplayCoordinate) * invertModifier );
-  //sender->GetRenderingManager()->RequestUpdate(sender->GetRenderWindow());
-  //m_LastDisplayCoordinate = positionEvent->GetPointerPositionOnScreen();
+  // perform translation
+  sender->GetDisplayGeometry()->MoveBy((positionEvent->GetPointerPosition() - m_LastDisplayCoordinate) * invertModifier);
+  sender->GetRenderingManager()->RequestUpdate(sender->GetRenderWindow());
+  m_LastDisplayCoordinate = positionEvent->GetPointerPosition();
   return true;
 }
 
 bool mitk::DisplayInteractor::Zoom(StateMachineAction*, InteractionEvent* interactionEvent)
 {
+  cout << "Zoom" << endl;
+
   const BaseRenderer::Pointer sender = interactionEvent->GetSender();
   InteractionPositionEvent* positionEvent = static_cast<InteractionPositionEvent*>(interactionEvent);
 
@@ -181,6 +207,47 @@ bool mitk::DisplayInteractor::Zoom(StateMachineAction*, InteractionEvent* intera
   m_CurrentDisplayCoordinate = positionEvent->GetPointerPositionOnScreen();
   return true;
 }
+
+bool mitk::DisplayInteractor::GestureZoom(StateMachineAction*, InteractionEvent* interactionEvent)
+{
+  cout << "GestureZoom" << endl;
+  const BaseRenderer::Pointer sender = interactionEvent->GetSender();
+  GestureEvent* positionEvent = static_cast<GestureEvent*>(interactionEvent);
+
+  //float factor = 1.0;
+  //float distance = 0;
+
+  //if (m_ZoomDirection == "updown")
+  //{
+  //  distance = m_CurrentDisplayCoordinate[1] - m_LastDisplayCoordinate[1];
+  //}
+  //else
+  //{
+  //  distance = m_CurrentDisplayCoordinate[0] - m_LastDisplayCoordinate[0];
+  //}
+
+  //if ( m_InvertZoomDirection )
+  //{
+  //  distance *= -1.0;
+  //}
+
+
+  //// set zooming speed
+  //if (distance < 0.0)
+  //{
+  //  factor = 1.0 / m_ZoomFactor;
+  //}
+  //else if (distance > 0.0)
+  //{
+  //  factor = 1.0 * m_ZoomFactor;
+  //}
+  sender->GetDisplayGeometry()->ZoomWithFixedWorldCoordinates(positionEvent->GetScale(), m_StartDisplayCoordinate, m_StartCoordinateInMM);
+  sender->GetRenderingManager()->RequestUpdate(sender->GetRenderWindow());
+  m_LastDisplayCoordinate = m_CurrentDisplayCoordinate;
+  m_CurrentDisplayCoordinate = positionEvent->GetPointerPosition();
+  return true;
+}
+
 
 bool mitk::DisplayInteractor::Scroll(StateMachineAction*, InteractionEvent* interactionEvent)
 {

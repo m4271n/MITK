@@ -11,21 +11,56 @@
   <param name="zoomDirection" value="updown"/>
   <!-- react to an event, even tough is was already processed by a DataInteractor-->
   <param name="alwaysReact" value="false"/>
+  <!-- Moving -->
+  <event_variant class="MousePressEvent" name="StartMove">
+    <attribute name="EventButton" value="MiddleMouseButton"/>
+  </event_variant>
+  <event_variant class="MouseReleaseEvent" name="EndMoving">
+    <attribute name="EventButton" value="MiddleMouseButton"/>
+  </event_variant>
+  <event_variant class="MouseMoveEvent" name="Moving">
+    <attribute name="ButtonState" value="MiddleMouseButton"/>
+  </event_variant>
+  <!-- Zooming -->
+  <event_variant class="MousePressEvent" name="StartZoom">
+    <attribute name="EventButton" value="RightMouseButton"/>
+  </event_variant>
+   <event_variant class="MouseMoveEvent" name="Zooming">
+    <attribute name="ButtonState" value="RightMouseButton"/>
+  </event_variant>
+  <event_variant class="MouseReleaseEvent" name="EndZooming">
+    <attribute name="EventButton" value="RightMouseButton"/>
+  </event_variant>
+  <!-- Scrolling through planes -->
+  <event_variant class="MouseWheelEvent" name="PlaneUP">
+    <attribute name="ScrollDirection" value="up"/>
+  </event_variant>
+  <event_variant class="MouseWheelEvent" name="PlaneDown">
+    <attribute name="ScrollDirection" value="down"/>
+  </event_variant>
+  <!-- pinch / zoom -->
+  <event_variant class="GestureBeginEvent" name="StartGesture">
+    <attribute name="EventState" value="Begin"/>
+  </event_variant>
+  <event_variant class="GestureUpdateEvent" name="GestureZooming">
+    <attribute name="EventState" value="Update"/>
+    <attribute name="GestureType" value="PinchZoom"/>
+  </event_variant>
+  <event_variant class="GestureEndEvent" name="EndGesture">
+    <attribute name="EventState" value="End"/>
+  </event_variant>
   <!-- panning with two fingers -->
   <event_variant class="GestureBeginEvent" name="StartGestureMove">
     <attribute name="EventState" value="Begin"/>
     <attribute name="GestureType" value="TwoFingerPan"/>
-    <attribute name="GestureRating" value="MayBeGesture"/>
   </event_variant>
   <event_variant class="GestureUpdateEvent" name="GestureMoving">
     <attribute name="EventState" value="Update"/>
     <attribute name="GestureType" value="TwoFingerPan"/>
-    <attribute name="GestureRating" value="TriggerGesture"/>
   </event_variant>
   <event_variant class="GestureEndEvent" name="EndGestureMoving">
     <attribute name="EventState" value="End"/>
     <attribute name="GestureType" value="TwoFingerPan"/>
-    <attribute name="GestureRating" value="FinishGesture"/>
   </event_variant>
   <!-- tap with one finger -->
   <event_variant class="GestureBeginEvent" name="StartGestureTap">
