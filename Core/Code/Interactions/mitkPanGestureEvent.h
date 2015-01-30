@@ -34,8 +34,8 @@ namespace mitk
 
   public:
     mitkClassMacro(PanGestureEvent, GestureEvent)
-    mitkNewMacro2Param(Self, BaseRenderer*, GestureRating)
-    mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
+    mitkNewMacro1Param(Self, BaseRenderer*)
+    mitkNewMacro2Param(Self, BaseRenderer*, EventState)
 
     itkGetConstMacro(Offset, Point2D)
     itkGetConstMacro(LastOffset, Point2D)
@@ -45,7 +45,7 @@ namespace mitk
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
-    PanGestureEvent(BaseRenderer*, GestureRating rating = Ignore, EventState state = Begin);
+    PanGestureEvent(BaseRenderer*, EventState state = Begin);
     virtual ~PanGestureEvent();
 
     virtual bool IsEqual(const InteractionEvent&) const;

@@ -30,6 +30,10 @@ namespace mitk
   */
   class MitkQmlItems_EXPORT GestureManager : public itk::Object
   {
+    typedef std::pair<GestureRecognizer::Pointer, GestureRecognizer::GestureState> RecognizerStatePair;
+    typedef std::list<RecognizerStatePair> RecognizerStatePairs;
+    typedef std::set<GestureRecognizer::Pointer> RecognizerSet;
+    typedef std::list<GestureEvent::Pointer> GestureEventList;
 
   public:
     mitkClassMacro(GestureManager, itk::Object);
@@ -42,16 +46,18 @@ namespace mitk
 
     GestureEvent::Pointer CheckForGesture(InteractionEvent* e);
 
-  public:
+  protected:
     GestureManager(BaseRenderer* ren);
     virtual ~GestureManager();
 
+    unsigned int HasCommonItems(RecognizerSet& a, RecognizerSet& b);
+
   private:
-    typedef std::pair<GestureRecognizer::Pointer, GestureState> RecognizerStatePair;
-    typedef std::list<std::pair<GestureRecognizer::Pointer, GestureState>> RecognizerStatePairs;
-    std::map<GestureState, unsigned int> m_StatusMap;
+    std::map<GestureRecognizer::GestureState, unsigned int> m_StatusMap;
     RecognizerStatePairs m_RecognizerStatusPairs;
     BaseRenderer* m_Renderer;
+
+    RecognizerSet m_ActiveGestures;
 
   };
 

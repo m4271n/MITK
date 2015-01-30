@@ -29,54 +29,90 @@ namespace mitk
   /**
   *  \brief a recognizer class for one finger taps
   */
-  class MitkQmlItems_EXPORT TapGestureRecognizer : public GestureRecognizer
+  class MitkQmlItems_EXPORT PinchGestureRecognizer : public GestureRecognizer
   {
 
   public:
-    mitkClassMacro(TapGestureRecognizer, GestureRecognizer);
-    mitkNewMacro1Param(Self, BaseRenderer*)
+    mitkClassMacro(PinchGestureRecognizer, GestureRecognizer);
+    mitkNewMacro1Param(Self, BaseRenderer*);
 
-      //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
-      virtual GestureEvent::Pointer Recognize(InteractionEvent* e, GestureState& s);
+    virtual void Recognize(InteractionEvent* e, GestureState& s);
     virtual void Reset();
 
   protected:
-    TapGestureRecognizer(BaseRenderer*);
-    virtual ~TapGestureRecognizer();
+    PinchGestureRecognizer(BaseRenderer*);
+    virtual ~PinchGestureRecognizer(){};
 
   private:
-    //Point2D m_StartPos_TP1;
-    //Point2D m_StartPos_TP2;
+    Point2D m_StartPosTP1;
+    Point2D m_StartPosTP2;
+    Point2D m_LastPosTP1;
+    Point2D m_LastPosTP2;
+    Point2D m_StartCenter;
     //Point2D m_LastOffset;
-    Point2D m_StartPos;
+    Point2D m_Center;
+    Point2D m_LastCenter;
+    double m_ScaleFactor;
+    double m_LastScaleFactor;
+    double m_TotalScaleFactor;
+    double m_RotationAngle;
+    double m_LastRotationAngle;
+    double m_TotalRotationAngle;
+    bool m_IsNewSequence;
   };
 
 
-  /**
-  *  \brief
-  */
-  class MitkQmlItems_EXPORT PanGestureRecognizer : public GestureRecognizer
-  {
+  ///**
+  //*  \brief a recognizer class for one finger taps
+  //*/
+  //class MitkQmlItems_EXPORT TapGestureRecognizer : public GestureRecognizer
+  //{
 
-  public:
-    mitkClassMacro(PanGestureRecognizer, GestureRecognizer);
-    //itkFactorylessNewMacro(Self)
-    mitkNewMacro1Param(Self, BaseRenderer*)
+  //public:
+  //  mitkClassMacro(TapGestureRecognizer, GestureRecognizer);
+  //  mitkNewMacro1Param(Self, BaseRenderer*)
 
-    //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
-    virtual GestureEvent::Pointer Recognize(InteractionEvent* e);
-    virtual void Reset();
+  //    //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
+  //    virtual GestureEvent::Pointer Recognize(InteractionEvent* e, GestureState& s);
+  //  virtual void Reset();
 
-  protected:
-    PanGestureRecognizer(BaseRenderer*);
-    virtual ~PanGestureRecognizer();
+  //protected:
+  //  TapGestureRecognizer(BaseRenderer*);
+  //  virtual ~TapGestureRecognizer();
 
-  private:
-    Point2D m_StartPos_TP1;
-    Point2D m_StartPos_TP2;
-    Point2D m_LastOffset;
-    Point2D m_Offset;
-  };
+  //private:
+  //  //Point2D m_StartPos_TP1;
+  //  //Point2D m_StartPos_TP2;
+  //  //Point2D m_LastOffset;
+  //  Point2D m_StartPos;
+  //};
+
+
+  ///**
+  //*  \brief
+  //*/
+  //class MitkQmlItems_EXPORT PanGestureRecognizer : public GestureRecognizer
+  //{
+
+  //public:
+  //  mitkClassMacro(PanGestureRecognizer, GestureRecognizer);
+  //  //itkFactorylessNewMacro(Self)
+  //  mitkNewMacro1Param(Self, BaseRenderer*)
+
+  //  //virtual GestureEvent::Pointer Create(BaseRenderer* renderer);
+  //  virtual GestureEvent::Pointer Recognize(InteractionEvent* e);
+  //  virtual void Reset();
+
+  //protected:
+  //  PanGestureRecognizer(BaseRenderer*);
+  //  virtual ~PanGestureRecognizer();
+
+  //private:
+  //  Point2D m_StartPos_TP1;
+  //  Point2D m_StartPos_TP2;
+  //  Point2D m_LastOffset;
+  //  Point2D m_Offset;
+  //};
 
 }
 

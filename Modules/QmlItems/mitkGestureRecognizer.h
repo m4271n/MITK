@@ -48,6 +48,8 @@ namespace mitk
       FinishGesture = 0x0008,
       CancelGesture = 0x0010,
 
+      NoGesture = 0x0020,
+
       ResultState_Mask = 0x00ff,
 
       ConsumeEventHint = 0x0100,
@@ -79,7 +81,7 @@ namespace mitk
         break;
       }
     }
-    virtual GestureEvent::Pointer Recognize(InteractionEvent* e GestureState& s) = 0;
+    virtual void Recognize(InteractionEvent* e, GestureState& s) = 0;
     virtual void Reset() = 0;
 
   protected:

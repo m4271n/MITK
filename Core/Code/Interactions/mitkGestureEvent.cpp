@@ -19,11 +19,11 @@
 
 mitk::GestureEvent::GestureEvent(
   mitk::BaseRenderer* baseRenderer
-, GestureRating rating
+//, GestureRating rating
 , EventState state
 , GestureType type)
 : InteractionEvent(baseRenderer)
-, m_GestureRating(rating)
+//, m_GestureRating(rating)
 , m_GestureState(state)
 , m_Type(type)
 {

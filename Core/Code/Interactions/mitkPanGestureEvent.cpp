@@ -17,10 +17,8 @@
 #include "mitkException.h"
 #include "mitkPanGestureEvent.h"
 
-mitk::PanGestureEvent::PanGestureEvent(mitk::BaseRenderer* baseRenderer,
-  GestureEvent::GestureRating rating
-, EventState state)
-: GestureEvent(baseRenderer, rating, state)
+mitk::PanGestureEvent::PanGestureEvent(mitk::BaseRenderer* baseRenderer, EventState state)
+: GestureEvent(baseRenderer, state)
 {
   m_Offset.Fill(0.0);
   m_LastOffset.Fill(0.0);

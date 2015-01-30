@@ -55,58 +55,83 @@ namespace mitk
     };
 
     mitkClassMacro(GestureEvent, InteractionEvent)
-    mitkNewMacro2Param(Self, BaseRenderer*, GestureRating)
-    mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
-    mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType)
+    mitkNewMacro1Param(Self, BaseRenderer*)
+    mitkNewMacro2Param(Self, BaseRenderer*, EventState)
+    mitkNewMacro3Param(Self, BaseRenderer*, EventState, GestureType)
+    //mitkNewMacro2Param(Self, BaseRenderer*, GestureRating)
+    //mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
+    //mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType)
     itkGetConstMacro(GestureState, EventState);
-    itkGetConstMacro(GestureRating, GestureRating);
+    //itkGetConstMacro(GestureRating, GestureRating);
     itkGetConstMacro(Type, GestureType);
 
-    void SetGestureRating(GestureRating rating){ m_GestureRating = rating; };
+    //void SetGestureRating(GestureRating rating){ m_GestureRating = rating; };
     void SetGestureState(EventState state){ m_GestureState = state; };
     void SetType(GestureType type){ m_Type = type; };
 
+    itkGetConstMacro(PointerPosition, Point2D);
     itkGetConstMacro(Offset, Point2D);
     itkGetConstMacro(LastOffset, Point2D);
     itkGetConstMacro(Hotspot, Point2D);
     void SetOffset(Point2D offset) { m_Offset = offset; };
     void SetLastOffset(Point2D offset) { m_LastOffset = offset; };
     void SetHotspot(Point2D hs) { m_Hotspot = hs; };
+    void SetPointerPosition(Point2D p) { m_PointerPosition = p; };
+
+
+    itkGetConstMacro(Scale, double);
+    itkGetConstMacro(LastScale, double);
+    itkGetConstMacro(TotalScale, double);
+    itkGetConstMacro(StartCenterPosition, Point2D);
+    void SetScale(double s) { m_Scale = s; };
+    void SetLastScale(double s) { m_LastScale = s; };
+    void SetTotalScale(double s) { m_TotalScale = s; };
+    void SetStartCenterPosition(Point2D c) { m_StartCenterPosition = c; };
 
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
-    GestureEvent(BaseRenderer*, GestureRating rating = Ignore, EventState state = Begin, GestureType type = Undefined);
+    GestureEvent(BaseRenderer*, /*GestureRating rating = Ignore, */EventState state = Begin, GestureType type = Undefined);
     virtual ~GestureEvent(){};
 
     friend MITK_CORE_EXPORT bool operator==(const GestureEvent&, const GestureEvent&);
     virtual bool IsEqual(const InteractionEvent&) const;
 
   private:
-    GestureRating m_GestureRating;
+    //GestureRating m_GestureRating;
     GestureType m_Type;
     InteractionEvent::EventState m_GestureState;  
 
     Point2D m_Offset;
     Point2D m_LastOffset;
     Point2D m_Hotspot;
+
+    double m_Scale;
+    double m_LastScale;
+    double m_TotalScale;
+    Point2D m_StartCenterPosition;
+
+    Point2D m_PointerPosition;
+
   };
 
   class MITK_CORE_EXPORT GestureBeginEvent : public GestureEvent
   {
   public:
     mitkClassMacro(GestureBeginEvent, GestureEvent);
-    mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
-    mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
+    mitkNewMacro2Param(Self, BaseRenderer*, EventState)
+    mitkNewMacro3Param(Self, BaseRenderer*, EventState, GestureType);
+    //mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
+    //mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
 
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
     GestureBeginEvent(BaseRenderer* ren,
-      GestureRating rating = Ignore,
+      //GestureRating rating = Ignore,
       EventState state = Begin,
       GestureType type = Undefined) :
-      GestureEvent(ren, rating, state, type){};
+      GestureEvent(ren, /*rating, */state, type){};
     virtual ~GestureBeginEvent(){};
 
     friend MITK_CORE_EXPORT bool operator==(const GestureBeginEvent&, const GestureBeginEvent&);
@@ -117,17 +142,18 @@ namespace mitk
   {
   public:
     mitkClassMacro(GestureUpdateEvent, GestureEvent);
-    mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
-    mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
+    mitkNewMacro2Param(Self, BaseRenderer*, EventState)
+      mitkNewMacro3Param(Self, BaseRenderer*, EventState, GestureType);
+    //mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
+    //mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
 
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
     GestureUpdateEvent(BaseRenderer* ren,
-      GestureRating rating = Ignore,
       EventState state = Begin,
       GestureType type = Undefined) :
-      GestureEvent(ren, rating, state, type){};
+      GestureEvent(ren, state, type){};
     virtual ~GestureUpdateEvent(){};
 
     friend MITK_CORE_EXPORT bool operator==(const GestureUpdateEvent&, const GestureUpdateEvent&);
@@ -138,17 +164,18 @@ namespace mitk
   {
   public:
     mitkClassMacro(GestureEndEvent, GestureEvent);
-    mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
-    mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
+    mitkNewMacro2Param(Self, BaseRenderer*, EventState)
+      mitkNewMacro3Param(Self, BaseRenderer*, EventState, GestureType);
+    //mitkNewMacro3Param(Self, BaseRenderer*, GestureRating, EventState)
+    //mitkNewMacro4Param(Self, BaseRenderer*, GestureRating, EventState, GestureType);
 
     virtual bool IsSuperClassOf(const InteractionEvent::Pointer& baseClass) const;
 
   protected:
     GestureEndEvent(BaseRenderer* ren,
-      GestureRating rating = Ignore,
       EventState state = Begin,
       GestureType type = Undefined) :
-      GestureEvent(ren, rating, state, type){};
+      GestureEvent(ren, state, type){};
     virtual ~GestureEndEvent(){};
 
     friend MITK_CORE_EXPORT bool operator==(const GestureEndEvent&, const GestureEndEvent&);
@@ -173,19 +200,19 @@ namespace mitk
   MITK_CORE_EXPORT bool operator==(const GestureEndEvent& a, const GestureEndEvent& b);
   MITK_CORE_EXPORT bool operator!=(const GestureEndEvent& a, const GestureEndEvent& b);
 
-  /*
-  * Allow bitwise OR operation on enums.
-  */
-  inline GestureEvent::GestureRating operator|(GestureEvent::GestureRating a, GestureEvent::GestureRating b)
-  {
-    return static_cast<GestureEvent::GestureRating>(static_cast<int>(a) | static_cast<int>(b));
-  }
+  ///*
+  //* Allow bitwise OR operation on enums.
+  //*/
+  //inline GestureEvent::GestureRating operator|(GestureEvent::GestureRating a, GestureEvent::GestureRating b)
+  //{
+  //  return static_cast<GestureEvent::GestureRating>(static_cast<int>(a) | static_cast<int>(b));
+  //}
 
-  inline GestureEvent::GestureRating& operator|=(GestureEvent::GestureRating& a, GestureEvent::GestureRating& b)
-  {
-    a = static_cast<GestureEvent::GestureRating>(static_cast<int>(a) | static_cast<int>(b));
-    return a;
-  }
+  //inline GestureEvent::GestureRating& operator|=(GestureEvent::GestureRating& a, GestureEvent::GestureRating& b)
+  //{
+  //  a = static_cast<GestureEvent::GestureRating>(static_cast<int>(a) | static_cast<int>(b));
+  //  return a;
+  //}
 } /* namespace mitk */
 
 #endif /* MITKGestureEvent_H_ */
