@@ -335,19 +335,19 @@ void QmlMitkRenderWindowItem::mousePressEvent(QMouseEvent* me)
   mitk::MousePressEvent::Pointer mPressEvent =
     mitk::MousePressEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
 
-//#if defined INTERACTION_LEGACY
-//  bool modernInteractorHandledEvent =
-//#endif
-//  mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
-//#if defined INTERACTION_LEGACY
-//  if (!modernInteractorHandledEvent)
-//  {
-//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-//    mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
-//  }
-//#endif
-//
-//  QVTKQuickItem::mousePressEvent(me);
+#if defined INTERACTION_LEGACY
+  bool modernInteractorHandledEvent =
+#endif
+  mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
+#if defined INTERACTION_LEGACY
+  if (!modernInteractorHandledEvent)
+  {
+    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+    mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
+  }
+#endif
+
+  QVTKQuickItem::mousePressEvent(me);
 
 //  if (m_ResendQtEvents)
 //    me->ignore();
@@ -360,19 +360,19 @@ void QmlMitkRenderWindowItem::mouseReleaseEvent(QMouseEvent* me)
   mitk::MouseReleaseEvent::Pointer mReleaseEvent =
     mitk::MouseReleaseEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
 
-//#if defined INTERACTION_LEGACY
-//  bool modernInteractorHandledEvent =
-//#endif
-//  mitk::RenderWindowBase::HandleEvent(mReleaseEvent.GetPointer());
-//#if defined INTERACTION_LEGACY
-//  if (!modernInteractorHandledEvent)
-//  {
-//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-//    mitk::RenderWindowBase::mouseReleaseMitkEvent(&myevent);
-//  }
-//#endif
-//
-//  QVTKQuickItem::mouseReleaseEvent(me);
+#if defined INTERACTION_LEGACY
+  bool modernInteractorHandledEvent =
+#endif
+  mitk::RenderWindowBase::HandleEvent(mReleaseEvent.GetPointer());
+#if defined INTERACTION_LEGACY
+  if (!modernInteractorHandledEvent)
+  {
+    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+    mitk::RenderWindowBase::mouseReleaseMitkEvent(&myevent);
+  }
+#endif
+
+  QVTKQuickItem::mouseReleaseEvent(me);
 
 //  if (m_ResendQtEvents)
 //    me->ignore();
@@ -385,17 +385,17 @@ void QmlMitkRenderWindowItem::mouseMoveEvent(QMouseEvent* me)
   mitk::MouseMoveEvent::Pointer mMoveEvent =
     mitk::MouseMoveEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me));
 
-//#if defined INTERACTION_LEGACY
-//  bool modernInteractorHandledEvent =
-//#endif
-//  mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
-//#if defined INTERACTION_LEGACY
-//  if (!modernInteractorHandledEvent)
-//  {
-//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-//    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
-//  }
-//#endif
+#if defined INTERACTION_LEGACY
+  bool modernInteractorHandledEvent =
+#endif
+  mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
+#if defined INTERACTION_LEGACY
+  if (!modernInteractorHandledEvent)
+  {
+    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
+  }
+#endif
 
   QVTKQuickItem::mouseMoveEvent(me);
 
@@ -440,6 +440,26 @@ void QmlMitkRenderWindowItem::touchEvent(QTouchEvent* te)
   {
     mitk::RenderWindowBase::HandleEvent(gestureEvent);
   }
+
+  cout << te->touchPoints().size();
+  static int count = 0;
+  count++;
+  if (te->type() == QEvent::Type::TouchBegin)
+  {
+    QMouseEvent* me = new QMouseEvent(QEvent::MouseButtonPress, te->touchPoints().at(0).pos(), Qt::MouseButton::RightButton, Qt::MouseButton::RightButton, Qt::KeyboardModifier::NoModifier);
+    QVTKQuickItem::mouseMoveEvent(me);
+  }
+  else if (te->type() == QEvent::Type::TouchUpdate)
+  {
+    QMouseEvent* me = new QMouseEvent(QEvent::MouseMove, te->touchPoints().at(0).pos(), Qt::MouseButton::RightButton, Qt::MouseButton::RightButton, Qt::KeyboardModifier::NoModifier);
+    QVTKQuickItem::mouseMoveEvent(me);
+  }
+  else
+  {
+    QMouseEvent* me = new QMouseEvent(QEvent::MouseButtonRelease, te->touchPoints().at(0).pos(), Qt::MouseButton::RightButton, Qt::MouseButton::RightButton, Qt::KeyboardModifier::NoModifier);
+    QVTKQuickItem::mouseMoveEvent(me);
+  }
+  
 
   QVTKQuickItem::touchEvent(te);
 }
