@@ -309,7 +309,9 @@ bool QVTKQuickItem::event(QEvent* e)
    {
       if (this->m_win)
       {
+         this->m_viewLock.lock();
          m_interactorAdapter->ProcessEvent(e, m_interactor);
+         this->m_viewLock.unlock();
          if (e->isAccepted())
          {
             return true;
