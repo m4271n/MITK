@@ -81,6 +81,7 @@ protected:
   virtual void keyReleaseEvent(QKeyEvent* e);
 
   // handle item mouse events
+  virtual bool event(QEvent* e);
   virtual void mousePressEvent(QMouseEvent* e);
   virtual void mouseReleaseEvent(QMouseEvent* e);
   virtual void mouseDoubleClickEvent(QMouseEvent* e);

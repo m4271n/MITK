@@ -301,6 +301,24 @@ void QVTKQuickItem::hoverMoveEvent(QHoverEvent* e)
   update();
 }
 
+bool QVTKQuickItem::event(QEvent* e)
+{
+   if (e->type() == QEvent::TouchBegin ||
+      e->type() == QEvent::TouchUpdate ||
+      e->type() == QEvent::TouchEnd)
+   {
+      if (this->m_win)
+      {
+         m_interactorAdapter->ProcessEvent(e, m_interactor);
+         if (e->isAccepted())
+         {
+            return true;
+         }
+      }
+   }
+   return QQuickItem::event(e);
+}
+
 void QVTKQuickItem::init()
 {
 }
