@@ -197,22 +197,14 @@ mitk::BaseRenderer::BaseRenderer(const char* name, vtkRenderWindow * renWin, mit
   m_CameraController = mitk::CameraController::New(NULL);
 #endif
 
-  m_VtkRenderer = vtkRenderer::New();
+  this->SetVtkRenderer(vtkRenderer::New());
 
-  if( renderingMode == RenderingMode::DepthPeeling )
+  if (renderingMode == RenderingMode::DepthPeeling)
   {
-    m_VtkRenderer->SetUseDepthPeeling(1);
-    m_VtkRenderer->SetMaximumNumberOfPeels(8);
-    m_VtkRenderer->SetOcclusionRatio(0.0);
+     m_VtkRenderer->SetUseDepthPeeling(1);
+     m_VtkRenderer->SetMaximumNumberOfPeels(8);
+     m_VtkRenderer->SetOcclusionRatio(0.0);
   }
-
-  if (mitk::VtkLayerController::GetInstance(m_RenderWindow) == NULL)
-  {
-    mitk::VtkLayerController::AddInstance(m_RenderWindow, m_VtkRenderer);
-    mitk::VtkLayerController::GetInstance(m_RenderWindow)->InsertSceneRenderer(m_VtkRenderer);
-  }
-  else
-    mitk::VtkLayerController::GetInstance(m_RenderWindow)->InsertSceneRenderer(m_VtkRenderer);
 }
 
 mitk::BaseRenderer::~BaseRenderer()
@@ -249,6 +241,19 @@ mitk::BaseRenderer::~BaseRenderer()
     m_RenderWindow->Delete();
     m_RenderWindow = NULL;
   }
+}
+
+void mitk::BaseRenderer::SetVtkRenderer(vtkRenderer* renderer)
+{
+   m_VtkRenderer = renderer;
+
+   if (mitk::VtkLayerController::GetInstance(m_RenderWindow) == NULL)
+   {
+      mitk::VtkLayerController::AddInstance(m_RenderWindow, m_VtkRenderer);
+      mitk::VtkLayerController::GetInstance(m_RenderWindow)->InsertSceneRenderer(m_VtkRenderer);
+   }
+   else
+      mitk::VtkLayerController::GetInstance(m_RenderWindow)->InsertSceneRenderer(m_VtkRenderer);
 }
 
 void mitk::BaseRenderer::RemoveAllLocalStorages()

@@ -139,6 +139,7 @@ namespace mitk
     {
       return m_VtkRenderer;
     }
+    virtual void SetVtkRenderer(vtkRenderer* renderer);
 
     //##Documentation
     //## @brief Returns the Dispatcher which handles Events for this BaseRenderer
