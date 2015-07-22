@@ -84,6 +84,8 @@ protected:
   virtual void keyPressEvent(QKeyEvent * e);
   virtual void keyReleaseEvent(QKeyEvent * e);
 
+  const char* GetUniqueName(QString name);
+
 private slots:
 
 private:
