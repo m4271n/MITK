@@ -251,8 +251,6 @@ void mitk::FiberfoxParameters< ScalarType >::SaveParameters(string filename)
     parameters.put("fiberfox.image.bvalue", m_SignalGen.m_Bvalue);
     parameters.put("fiberfox.image.simulatekspace", m_SignalGen.m_SimulateKspaceAcquisition);
     parameters.put("fiberfox.image.axonRadius", m_SignalGen.m_AxonRadius);
-    parameters.put("fiberfox.image.diffusiondirectionmode", m_SignalGen.m_DiffusionDirectionMode);
-    parameters.put("fiberfox.image.fiberseparationthreshold", m_SignalGen.m_FiberSeparationThreshold);
     parameters.put("fiberfox.image.doSimulateRelaxation", m_SignalGen.m_DoSimulateRelaxation);
     parameters.put("fiberfox.image.doDisablePartialVolume", m_SignalGen.m_DoDisablePartialVolume);
     parameters.put("fiberfox.image.artifacts.spikesnum", m_SignalGen.m_Spikes);
@@ -290,9 +288,9 @@ void mitk::FiberfoxParameters< ScalarType >::SaveParameters(string filename)
     if (m_NoiseModel!=NULL)
     {
         parameters.put("fiberfox.image.artifacts.noisevariance", m_NoiseModel->GetNoiseVariance());
-        if (dynamic_cast<mitk::RicianNoiseModel<ScalarType>*>(m_NoiseModel))
+        if (dynamic_cast<mitk::RicianNoiseModel<ScalarType>*>(m_NoiseModel.get()))
             parameters.put("fiberfox.image.artifacts.noisetype", "rice");
-        else if (dynamic_cast<mitk::ChiSquareNoiseModel<ScalarType>*>(m_NoiseModel))
+        else if (dynamic_cast<mitk::ChiSquareNoiseModel<ScalarType>*>(m_NoiseModel.get()))
             parameters.put("fiberfox.image.artifacts.noisetype", "chisquare");
     }
 
@@ -475,8 +473,8 @@ void mitk::FiberfoxParameters< ScalarType >::LoadParameters(string filename)
 
     m_FiberModelList.clear();
     m_NonFiberModelList.clear();
-    if (m_NoiseModel!=NULL)
-        delete m_NoiseModel;
+    if (m_NoiseModel)
+        m_NoiseModel = nullptr;
 
     BOOST_FOREACH( boost::property_tree::ptree::value_type const& v1, parameterTree.get_child("fiberfox") )
     {
@@ -562,21 +560,6 @@ void mitk::FiberfoxParameters< ScalarType >::LoadParameters(string filename)
             m_SignalGen.m_SimulateKspaceAcquisition = ReadVal<bool>(v1,"simulatekspace", m_SignalGen.m_SimulateKspaceAcquisition);
 
             m_SignalGen.m_AxonRadius = ReadVal<double>(v1,"axonRadius", m_SignalGen.m_AxonRadius);
-            switch (ReadVal<int>(v1,"diffusiondirectionmode", 0))
-            {
-            case 0:
-                m_SignalGen.m_DiffusionDirectionMode = SignalGenerationParameters::FIBER_TANGENT_DIRECTIONS;
-                break;
-            case 1:
-                m_SignalGen.m_DiffusionDirectionMode = SignalGenerationParameters::MAIN_FIBER_DIRECTIONS;
-                break;
-            case 2:
-                m_SignalGen.m_DiffusionDirectionMode = SignalGenerationParameters::RANDOM_DIRECTIONS;
-                break;
-            default:
-                m_SignalGen.m_DiffusionDirectionMode = SignalGenerationParameters::FIBER_TANGENT_DIRECTIONS;
-            }
-            m_SignalGen.m_FiberSeparationThreshold = ReadVal<double>(v1,"fiberseparationthreshold", m_SignalGen.m_FiberSeparationThreshold);
             m_SignalGen.m_Spikes = ReadVal<unsigned int>(v1,"artifacts.spikesnum", m_SignalGen.m_Spikes);
             m_SignalGen.m_SpikeAmplitude = ReadVal<double>(v1,"artifacts.spikesscale", m_SignalGen.m_SpikeAmplitude);
             m_SignalGen.m_KspaceLineOffset = ReadVal<double>(v1,"artifacts.kspaceLineOffset", m_SignalGen.m_KspaceLineOffset);
@@ -632,7 +615,7 @@ void mitk::FiberfoxParameters< ScalarType >::LoadParameters(string filename)
             {
                 if (ReadVal<string>(v1,"artifacts.noisetype","")=="rice")
                 {
-                    m_NoiseModel = new mitk::RicianNoiseModel<ScalarType>();
+                    m_NoiseModel = std::make_shared< mitk::RicianNoiseModel<ScalarType> >();
                     m_NoiseModel->SetNoiseVariance(ReadVal<double>(v1,"artifacts.noisevariance",m_NoiseModel->GetNoiseVariance()));
                 }
             }
@@ -641,7 +624,7 @@ void mitk::FiberfoxParameters< ScalarType >::LoadParameters(string filename)
             {
                 if (ReadVal<string>(v1,"artifacts.noisetype","")=="chisquare")
                 {
-                    m_NoiseModel = new mitk::ChiSquareNoiseModel<ScalarType>();
+                    m_NoiseModel = std::make_shared< mitk::ChiSquareNoiseModel<ScalarType> >();
                     m_NoiseModel->SetNoiseVariance(ReadVal<double>(v1,"artifacts.noisevariance",m_NoiseModel->GetNoiseVariance()));
                 }
             }

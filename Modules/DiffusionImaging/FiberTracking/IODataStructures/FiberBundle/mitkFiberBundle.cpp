@@ -409,7 +409,7 @@ void mitk::FiberBundle::ColorFibersByOrientation()
     m_UpdateTime2D.Modified();
 }
 
-void mitk::FiberBundle::ColorFibersByCurvature()
+void mitk::FiberBundle::ColorFibersByCurvature(bool minMaxNorm)
 {
     double window = 5;
 
@@ -516,8 +516,10 @@ void mitk::FiberBundle::ColorFibersByCurvature()
         for (int j=0; j<numPoints; j++)
         {
             double color[3];
-            double dev = (values.at(count)-min)/(max-min);
-//            double dev = values.at(count)*values.at(count);
+            double dev = values.at(count);
+            if (minMaxNorm)
+                dev = (dev-min)/(max-min);
+            //            double dev = values.at(count)*values.at(count);
             lookupTable->GetColor(dev, color);
 
             rgba[0] = (unsigned char) (255.0 * color[0]);
@@ -640,7 +642,7 @@ void mitk::FiberBundle::GenerateFiberIds()
 
 }
 
-mitk::FiberBundle::Pointer mitk::FiberBundle::ExtractFiberSubset(ItkUcharImgType* mask, bool anyPoint, bool invert)
+mitk::FiberBundle::Pointer mitk::FiberBundle::ExtractFiberSubset(ItkUcharImgType* mask, bool anyPoint, bool invert, bool bothEnds)
 {
     vtkSmartPointer<vtkPolyData> polyData = m_FiberPolyData;
     if (anyPoint)
@@ -747,13 +749,52 @@ mitk::FiberBundle::Pointer mitk::FiberBundle::ExtractFiberSubset(ItkUcharImgType
                 itk::Index<3> idxEnd;
                 mask->TransformPhysicalPointToIndex(itkEnd, idxEnd);
 
-                if ( mask->GetPixel(idxStart)>0 && mask->GetPixel(idxEnd)>0 && mask->GetLargestPossibleRegion().IsInside(idxStart) && mask->GetLargestPossibleRegion().IsInside(idxEnd) )
+                if (invert)
                 {
-                    for (int j=0; j<numPointsOriginal; j++)
+                    if (bothEnds)
                     {
-                        double* p = pointsOriginal->GetPoint(j);
-                        vtkIdType id = vtkNewPoints->InsertNextPoint(p);
-                        container->GetPointIds()->InsertNextId(id);
+                        if ( !mask->GetPixel(idxStart)>0 && !mask->GetPixel(idxEnd)>0 )
+                        {
+                            for (int j=0; j<numPointsOriginal; j++)
+                            {
+                                double* p = pointsOriginal->GetPoint(j);
+                                vtkIdType id = vtkNewPoints->InsertNextPoint(p);
+                                container->GetPointIds()->InsertNextId(id);
+                            }
+                        }
+                    }
+                    else if ( !mask->GetPixel(idxStart)>0 || !mask->GetPixel(idxEnd)>0 )
+                    {
+                        for (int j=0; j<numPointsOriginal; j++)
+                        {
+                            double* p = pointsOriginal->GetPoint(j);
+                            vtkIdType id = vtkNewPoints->InsertNextPoint(p);
+                            container->GetPointIds()->InsertNextId(id);
+                        }
+                    }
+                }
+                else
+                {
+                    if (bothEnds)
+                    {
+                        if ( mask->GetPixel(idxStart)>0 && mask->GetPixel(idxEnd)>0 && mask->GetLargestPossibleRegion().IsInside(idxStart) && mask->GetLargestPossibleRegion().IsInside(idxEnd) )
+                        {
+                            for (int j=0; j<numPointsOriginal; j++)
+                            {
+                                double* p = pointsOriginal->GetPoint(j);
+                                vtkIdType id = vtkNewPoints->InsertNextPoint(p);
+                                container->GetPointIds()->InsertNextId(id);
+                            }
+                        }
+                    }
+                    else if ( (mask->GetPixel(idxStart)>0 && mask->GetLargestPossibleRegion().IsInside(idxStart)) || (mask->GetPixel(idxEnd)>0 && mask->GetLargestPossibleRegion().IsInside(idxEnd)) )
+                    {
+                        for (int j=0; j<numPointsOriginal; j++)
+                        {
+                            double* p = pointsOriginal->GetPoint(j);
+                            vtkIdType id = vtkNewPoints->InsertNextPoint(p);
+                            container->GetPointIds()->InsertNextId(id);
+                        }
                     }
                 }
             }
@@ -845,7 +886,7 @@ mitk::FiberBundle::Pointer mitk::FiberBundle::RemoveFibersOutside(ItkUcharImgTyp
     newPolyData->SetPoints(vtkNewPoints);
     newPolyData->SetLines(vtkNewCells);
     mitk::FiberBundle::Pointer newFib = mitk::FiberBundle::New(newPolyData);
-    newFib->ResampleSpline(minSpacing/2);
+    newFib->Compress(0.1);
     return newFib;
 }
 

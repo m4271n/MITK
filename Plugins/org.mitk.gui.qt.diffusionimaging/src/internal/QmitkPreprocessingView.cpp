@@ -190,7 +190,6 @@ void QmitkPreprocessingView::CreateConnections()
         connect( (QObject*)(m_Controls->m_FlipAxis), SIGNAL(clicked()), this, SLOT(DoFlipAxis()) );
         connect( (QObject*)(m_Controls->m_SelctedImageComboBox), SIGNAL(OnSelectionChanged(const mitk::DataNode*)), this, SLOT(OnImageSelectionChanged()) );
 
-        //        connect( (QObject*)(m_Controls->m_ExtractBrainMask), SIGNAL(clicked()), this, SLOT(DoExtractBrainMask()) );
     }
 }
 
@@ -394,7 +393,14 @@ void QmitkPreprocessingView::DoCropImage()
         cropper->SetInput( itkVectorImagePointer );
         cropper->Update();
 
-        mitk::Image::Pointer newimage = mitk::GrabItkImageMemory( cropper->GetOutput() );
+        ItkDwiType::Pointer itkOutImage = cropper->GetOutput();
+        itk::Point<double,3> origin = itkOutImage->GetOrigin();
+        origin[0] += lower[0]*itkOutImage->GetSpacing()[0];
+        origin[1] += lower[1]*itkOutImage->GetSpacing()[1];
+        origin[2] += lower[2]*itkOutImage->GetSpacing()[2];
+        itkOutImage->SetOrigin(origin);
+
+        mitk::Image::Pointer newimage = mitk::GrabItkImageMemory( itkOutImage );
         newimage->SetProperty( mitk::DiffusionPropertyHelper::GRADIENTCONTAINERPROPERTYNAME.c_str(), mitk::GradientDirectionsProperty::New( static_cast<mitk::GradientDirectionsProperty*>( image->GetProperty(mitk::DiffusionPropertyHelper::GRADIENTCONTAINERPROPERTYNAME.c_str()).GetPointer() )->GetGradientDirectionsContainer() ) );
         newimage->SetProperty( mitk::DiffusionPropertyHelper::REFERENCEBVALUEPROPERTYNAME.c_str(), mitk::FloatProperty::New( static_cast<mitk::FloatProperty*>(image->GetProperty(mitk::DiffusionPropertyHelper::REFERENCEBVALUEPROPERTYNAME.c_str()).GetPointer() )->GetValue() ) );
         newimage->SetProperty( mitk::DiffusionPropertyHelper::MEASUREMENTFRAMEPROPERTYNAME.c_str(), mitk::MeasurementFrameProperty::New( static_cast<mitk::MeasurementFrameProperty*>(image->GetProperty(mitk::DiffusionPropertyHelper::MEASUREMENTFRAMEPROPERTYNAME.c_str()).GetPointer() )->GetMeasurementFrame() ) );
@@ -1427,28 +1433,39 @@ void QmitkPreprocessingView::DoAdcCalculation()
     GetDefaultDataStorage()->Add(imageNode, node);
 }
 
+void QmitkPreprocessingView::CleanBValueTableWidget()
+{
+  m_Controls->m_B_ValueMap_TableWidget->clear();
+  m_Controls->m_B_ValueMap_TableWidget->setRowCount(1);
+  QStringList headerList;
+  headerList << "b-Value" << "Number of gradients";
+  m_Controls->m_B_ValueMap_TableWidget->setHorizontalHeaderLabels(headerList);
+  m_Controls->m_B_ValueMap_TableWidget->setItem(0,0,new QTableWidgetItem("-"));
+  m_Controls->m_B_ValueMap_TableWidget->setItem(0,1,new QTableWidgetItem("-"));
+}
 
-void QmitkPreprocessingView::UpdateBValueTableWidget(int i)
+void QmitkPreprocessingView::UpdateBValueTableWidget(int)
 {
     mitk::DataNode::Pointer node = m_Controls->m_SelctedImageComboBox->GetSelectedNode();
+
     if (node.IsNull())
+    {
+        CleanBValueTableWidget();
         return;
+    }
+
     mitk::Image::Pointer image = dynamic_cast<mitk::Image*>(node->GetData());
 
     bool isDiffusionImage(false);
+
     isDiffusionImage = mitk::DiffusionPropertyHelper::IsDiffusionWeightedImage(image);
 
     if ( ! isDiffusionImage )
     {
-        m_Controls->m_B_ValueMap_TableWidget->clear();
-        m_Controls->m_B_ValueMap_TableWidget->setRowCount(1);
-        QStringList headerList;
-        headerList << "b-Value" << "Number of gradients";
-        m_Controls->m_B_ValueMap_TableWidget->setHorizontalHeaderLabels(headerList);
-        m_Controls->m_B_ValueMap_TableWidget->setItem(0,0,new QTableWidgetItem("-"));
-        m_Controls->m_B_ValueMap_TableWidget->setItem(0,1,new QTableWidgetItem("-"));
-    }else{
-
+        CleanBValueTableWidget();
+    }
+    else
+    {
         typedef mitk::BValueMapProperty::BValueMap BValueMap;
         typedef mitk::BValueMapProperty::BValueMap::iterator BValueMapIterator;
 
@@ -1632,6 +1649,12 @@ void QmitkPreprocessingView::OnImageSelectionChanged()
                 }
             }
     }
+}
+
+void QmitkPreprocessingView::Visible()
+{
+    QmitkFunctionality::Visible();
+    OnImageSelectionChanged();
 }
 
 void QmitkPreprocessingView::Activated()
@@ -1856,6 +1879,10 @@ void QmitkPreprocessingView::DoReduceGradientDirections()
 
     imageNode->SetName(name.toStdString().c_str());
     GetDefaultDataStorage()->Add(imageNode, node);
+
+    // update the b-value widget to remove the modified number of gradients used for extraction
+    this->CleanBValueTableWidget();
+    this->UpdateBValueTableWidget(0);
 }
 
 void QmitkPreprocessingView::MergeDwis()

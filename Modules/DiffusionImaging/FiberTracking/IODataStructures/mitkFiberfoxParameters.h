@@ -49,12 +49,6 @@ public:
     typedef itk::Vector<double,3>                   GradientType;
     typedef std::vector<GradientType>               GradientListType;
 
-    enum DiffusionDirectionMode : int {
-        FIBER_TANGENT_DIRECTIONS,
-        MAIN_FIBER_DIRECTIONS,
-        RANDOM_DIRECTIONS
-    };
-
     enum CoilSensitivityProfile : int {
         COIL_CONSTANT,
         COIL_LINEAR,
@@ -82,8 +76,6 @@ public:
         , m_SimulateKspaceAcquisition(false)
         , m_AxonRadius(0)
         , m_DoDisablePartialVolume(false)
-        , m_DiffusionDirectionMode(SignalGenerationParameters::FIBER_TANGENT_DIRECTIONS)
-        , m_FiberSeparationThreshold(30)
         , m_Spikes(0)
         , m_SpikeAmplitude(1)
         , m_KspaceLineOffset(0)
@@ -116,7 +108,7 @@ public:
     itk::Matrix<double, 3, 3>           m_ImageDirection;           ///< Image rotation matrix.
 
     /** Other acquisitions parameters */
-    AcquisitionType                     m_AcquisitionType;            ///< determines k-space trajectory and maximum echo position(s)
+    AcquisitionType                     m_AcquisitionType;          ///< determines k-space trajectory and maximum echo position(s)
     double                              m_SignalScale;              ///< Scaling factor for output signal (before noise is added).
     double                              m_tEcho;                    ///< Echo time TE.
     double                              m_tRep;                     ///< Echo time TR.
@@ -131,8 +123,6 @@ public:
     bool                                m_SimulateKspaceAcquisition;///< Flag to enable/disable k-space acquisition simulation
     double                              m_AxonRadius;               ///< Determines compartment volume fractions (0 == automatic axon radius estimation)
     bool                                m_DoDisablePartialVolume;   ///< Disable partial volume effects. Each voxel is either all fiber or all non-fiber.
-    DiffusionDirectionMode              m_DiffusionDirectionMode;   ///< Determines how the main diffusion direction of the signal models is selected
-    double                              m_FiberSeparationThreshold; ///< Used for random and and mein fiber deriction DiffusionDirectionMode
 
     /** Artifacts and other effects */
     unsigned int                        m_Spikes;                   ///< Number of spikes randomly appearing in the image
@@ -293,10 +283,10 @@ public:
 
         if (m_NoiseModel!=NULL)
         {
-            if (dynamic_cast<mitk::RicianNoiseModel<ScalarType>*>(m_NoiseModel))
-                out.m_NoiseModel = new mitk::RicianNoiseModel<OutType>();
-            else if (dynamic_cast<mitk::ChiSquareNoiseModel<ScalarType>*>(m_NoiseModel))
-                out.m_NoiseModel = new mitk::ChiSquareNoiseModel<OutType>();
+            if (dynamic_cast<mitk::RicianNoiseModel<ScalarType>*>(m_NoiseModel.get()))
+                out.m_NoiseModel = std::make_shared< mitk::RicianNoiseModel<OutType> >();
+            else if (dynamic_cast<mitk::ChiSquareNoiseModel<ScalarType>*>(m_NoiseModel.get()))
+                out.m_NoiseModel = std::make_shared< mitk::ChiSquareNoiseModel<OutType> >();
             out.m_NoiseModel->SetNoiseVariance(m_NoiseModel->GetNoiseVariance());
         }
 
@@ -339,7 +329,7 @@ public:
     /** Templated parameters */
     DiffusionModelListType              m_FiberModelList;       ///< Intra- and inter-axonal compartments.
     DiffusionModelListType              m_NonFiberModelList;    ///< Extra-axonal compartments.
-    NoiseModelType*                     m_NoiseModel;           ///< If != NULL, noise is added to the image.
+    std::shared_ptr< NoiseModelType >   m_NoiseModel;           ///< If != NULL, noise is added to the image.
 
     void PrintSelf();                           ///< Print parameters to stdout.
     void SaveParameters(string filename);       ///< Save image generation parameters to .ffp file.

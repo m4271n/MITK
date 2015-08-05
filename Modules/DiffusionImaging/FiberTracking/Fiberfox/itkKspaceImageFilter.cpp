@@ -52,6 +52,7 @@ void KspaceImageFilter< TPixelType >
 ::BeforeThreadedGenerateData()
 {
     m_Spike = vcl_complex<double>(0,0);
+    m_SpikeLog = "";
 
     typename OutputImageType::Pointer outputImage = OutputImageType::New();
     itk::ImageRegion<2> region; region.SetSize(0, m_Parameters->m_SignalGen.m_CroppedRegion.GetSize(0));  region.SetSize(1, m_Parameters->m_SignalGen.m_CroppedRegion.GetSize(1));
@@ -68,7 +69,7 @@ void KspaceImageFilter< TPixelType >
     m_KSpaceImage->Allocate();
     m_KSpaceImage->FillBuffer(0.0);
 
-    m_Gamma = 42576000;    // Gyromagnetic ratio in Hz/T
+    m_Gamma = 42576000;    // Gyromagnetic ratio in Hz/T (1.5T)
     if ( m_Parameters->m_SignalGen.m_EddyStrength>0 && m_DiffusionGradientDirection.GetNorm()>0.001)
     {
         m_DiffusionGradientDirection.Normalize();
@@ -173,36 +174,35 @@ void KspaceImageFilter< TPixelType >
     double kyMax = m_Parameters->m_SignalGen.m_CroppedRegion.GetSize(1);
     double xMax = m_CompartmentImages.at(0)->GetLargestPossibleRegion().GetSize(0); // scanner coverage in x-direction
     double yMax = m_CompartmentImages.at(0)->GetLargestPossibleRegion().GetSize(1); // scanner coverage in y-direction
-    double yMaxFov = yMax*m_Parameters->m_SignalGen.m_CroppingFactor;                // actual FOV in y-direction (in x-direction FOV=xMax)
+    double yMaxFov = yMax*m_Parameters->m_SignalGen.m_CroppingFactor;               // actual FOV in y-direction (in x-direction FOV=xMax)
 
     double numPix = kxMax*kyMax;
-
     double noiseVar = m_Parameters->m_SignalGen.m_PartialFourier*m_Parameters->m_SignalGen.m_NoiseVariance/(kyMax*kxMax); // adjust noise variance since it is the intended variance in physical space and not in k-space
-
-//    double dt =  m_Parameters->m_SignalGen.m_tLine/kxMax;  // time to read one k-space voxel
 
     while( !oit.IsAtEnd() )
     {
-        // dephasing time
+        // time from maximum echo
         double t= m_ReadoutScheme->GetTimeFromMaxEcho(oit.GetIndex());
 
-        // readout time
-        double tall = m_ReadoutScheme->GetRedoutTime(oit.GetIndex());
+        // time passed since k-space readout started
+        double tRead = m_ReadoutScheme->GetRedoutTime(oit.GetIndex());
 
-        // calculate eddy current decay factor
+        // time passes since application of the RF pulse
+        double tRf = m_Parameters->m_SignalGen.m_tEcho+t;
+
+        // calculate eddy current decay factor (TODO: vielleicht umbauen dass hier die zeit vom letzten diffusionsgradienten an genommen wird. doku dann auch entsprechend anpassen.)
         double eddyDecay = 0;
         if ( m_Parameters->m_Misc.m_CheckAddEddyCurrentsBox && m_Parameters->m_SignalGen.m_EddyStrength>0)
-            eddyDecay = exp(-tall/m_Parameters->m_SignalGen.m_Tau );
+            eddyDecay = exp(-tRead/m_Parameters->m_SignalGen.m_Tau );
 
         // calcualte signal relaxation factors
         std::vector< double > relaxFactor;
         if ( m_Parameters->m_SignalGen.m_DoSimulateRelaxation)
             for (unsigned int i=0; i<m_CompartmentImages.size(); i++)
-                relaxFactor.push_back( exp(-( m_Parameters->m_SignalGen.m_tEcho+t)/m_T2.at(i) -fabs(t)/ m_Parameters->m_SignalGen.m_tInhom)*(1.0-exp(-m_Parameters->m_SignalGen.m_tRep/m_T1.at(i))) );
+                relaxFactor.push_back( exp(-tRf/m_T2.at(i) -fabs(t)/ m_Parameters->m_SignalGen.m_tInhom)*(1.0-exp(-(m_Parameters->m_SignalGen.m_tRep + tRf)/m_T1.at(i))) );
 
         // get current k-space index (depends on the schosen k-space readout scheme)
         itk::Index< 2 > kIdx = m_ReadoutScheme->GetActualKspaceIndex(oit.GetIndex());
-
 
         // partial fourier
         bool pf = false;
@@ -269,7 +269,7 @@ void KspaceImageFilter< TPixelType >
                 {
                     itk::Point<double, 3> point3D;
                     ItkDoubleImgType::IndexType index; index[0] = it.GetIndex()[0]; index[1] = it.GetIndex()[1]; index[2] = m_Zidx;
-                    if (m_Parameters->m_SignalGen.m_DoAddMotion)
+                    if (m_Parameters->m_SignalGen.m_DoAddMotion)    // we have to account for the head motion since this also moves our frequency map
                     {
                         m_Parameters->m_SignalGen.m_FrequencyMap->TransformIndexToPhysicalPoint(index, point3D);
                         point3D = m_FiberBundle->TransformPoint(point3D.GetVnlVector(), -m_Rotation[0],-m_Rotation[1],-m_Rotation[2],-m_Translation[0],-m_Translation[1],-m_Translation[2]);
@@ -301,19 +301,7 @@ void KspaceImageFilter< TPixelType >
                 s = vcl_complex<double>(s.real()+randGen->GetNormalVariate(0,noiseVar), s.imag()+randGen->GetNormalVariate(0,noiseVar));
 
             outputImage->SetPixel(kIdx, s);
-            //            m_KSpaceImage->SetPixel(kIdx, t/dt );
             m_KSpaceImage->SetPixel(kIdx, sqrt(s.imag()*s.imag()+s.real()*s.real()) );
-//            if (m_Parameters->m_SignalGen.m_FrequencyMap.IsNotNull()) // simulate distortions
-//            {
-//                itk::Point<double, 3> point3D;
-//                ItkDoubleImgType::IndexType index; index[0] = kIdx[0]; index[1] = kIdx[1]; index[2] = m_Zidx;
-//                if (m_Parameters->m_SignalGen.m_DoAddMotion)
-//                {
-//                    m_Parameters->m_SignalGen.m_FrequencyMap->TransformIndexToPhysicalPoint(index, point3D);
-//                    point3D = m_FiberBundle->TransformPoint(point3D.GetVnlVector(), -m_Rotation[0],-m_Rotation[1],-m_Rotation[2],-m_Translation[0],-m_Translation[1],-m_Translation[2]);
-//                    m_KSpaceImage->SetPixel(kIdx, InterpolateFmapValue(point3D) );
-//                }
-//            }
         }
 
         ++oit;
@@ -376,6 +364,7 @@ void KspaceImageFilter< TPixelType >
         spikeIdx[0] = randGen->GetIntegerVariate()%(int)kxMax;
         spikeIdx[1] = randGen->GetIntegerVariate()%(int)kyMax;
         outputImage->SetPixel(spikeIdx, m_Spike);
+        m_SpikeLog += "[" + boost::lexical_cast<std::string>(spikeIdx[0]) + "," + boost::lexical_cast<std::string>(spikeIdx[1]) + "," + boost::lexical_cast<std::string>(m_Zidx) + "] Magnitude: " + boost::lexical_cast<std::string>(m_Spike.real()) + "+" + boost::lexical_cast<std::string>(m_Spike.imag()) + "i\n";
     }
 }
 
