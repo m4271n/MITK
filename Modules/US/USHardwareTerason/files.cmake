@@ -1,0 +1,11 @@
+SET(CPP_FILES
+mitkUSTerasonActivator.cpp
+mitkUSTerasonDevice.cpp
+mitkUSTerasonImageSource.cpp
+#mitkUSTerasonProbe.cpp
+#mitkUSTerasonScanConverterPlugin.cpp
+#mitkUSTerasonSDKHeader.cpp
+#mitkUSTerasonBModeControls.cpp
+#mitkUSTerasonDopplerControls.cpp
+#mitkUSTerasonProbesControls.cpp
+)

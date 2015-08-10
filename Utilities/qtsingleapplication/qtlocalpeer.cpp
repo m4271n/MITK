@@ -42,6 +42,7 @@
 #include "qtlocalpeer.h"
 #include <QCoreApplication>
 #include <QTime>
+#include <qdatastream.h>
 
 #if defined(Q_OS_WIN)
 #include <QLibrary>

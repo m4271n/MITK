@@ -17,6 +17,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "qthandlenewappinstance.h"
 
 #include "qtsingleapplication.h"
+#include <qdatastream.h>
 
 #if QT_VERSION < 0x050000
 

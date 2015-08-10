@@ -15,6 +15,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 ===================================================================*/
 
 #include "QmitkMimeTypes.h"
+#include <qdatastream.h>
 
 const QString QmitkMimeTypes::DataNodePtrs = "application/x-qmitk-datanode-ptrs";
 const QString QmitkMimeTypes::DataStorageTreeItemPtrs = "application/x-qmitk-datastorage-treeitem-ptrs";
