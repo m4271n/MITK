@@ -149,22 +149,22 @@ namespace mitk {
      */
     ProviderCommand::Pointer m_StreamingCommand;
 
-    /**
-     * \brief Timer thread for generating a continuous time signal for the stream
-     *
-     * Everyt time the time is passed a time signal is invoked.
-     *
-     * \param pInfoStruct pointer to the mitkIGTLMessageProvider object
-     * \return
-     */
-    static ITK_THREAD_RETURN_TYPE TimerThread(void* pInfoStruct);
+    ///**
+    // * \brief Timer thread for generating a continuous time signal for the stream
+    // *
+    // * Everyt time the time is passed a time signal is invoked.
+    // *
+    // * \param pInfoStruct pointer to the mitkIGTLMessageProvider object
+    // * \return
+    // */
+    //static ITK_THREAD_RETURN_TYPE TimerThread(void* pInfoStruct);
 
-    int                                       m_ThreadId;
+    //int                                       m_ThreadId;
 
-    /** \brief timer thread will terminate after the next wakeup if set to true */
-    bool                                      m_StopStreamingThread;
+    ///** \brief timer thread will terminate after the next wakeup if set to true */
+    //bool                                      m_StopStreamingThread;
 
-    itk::SmartPointer<itk::MultiThreader>     m_MultiThreader;
+    //itk::SmartPointer<itk::MultiThreader>     m_MultiThreader;
 
     /** \brief the time used for streaming */
     unsigned int                              m_StreamingTime;
@@ -172,8 +172,8 @@ namespace mitk {
     /** \brief mutex for guarding m_Time */
     itk::SmartPointer<itk::FastMutexLock>     m_StreamingTimeMutex;
 
-    /** \brief mutex for guarding m_StopStreamingThread */
-    itk::SmartPointer<itk::FastMutexLock>     m_StopStreamingThreadMutex;
+    ///** \brief mutex for guarding m_StopStreamingThread */
+    //itk::SmartPointer<itk::FastMutexLock>     m_StopStreamingThreadMutex;
 
     /** \brief flag to indicate if the provider is streaming */
     bool                                      m_IsStreaming;

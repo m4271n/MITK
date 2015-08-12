@@ -42,10 +42,10 @@ mitk::IGTLMessageProvider::IGTLMessageProvider()
   : mitk::IGTLDeviceSource()
 {
   this->SetName("IGTLMessageProvider");
-  m_MultiThreader = itk::MultiThreader::New();
+  //m_MultiThreader = itk::MultiThreader::New();
   m_StreamingTimeMutex = itk::FastMutexLock::New();
-  m_StopStreamingThreadMutex = itk::FastMutexLock::New();
-  m_ThreadId = 0;
+  //m_StopStreamingThreadMutex = itk::FastMutexLock::New();
+  //m_ThreadId = 0;
   m_IsStreaming = false;
 }
 
@@ -328,53 +328,53 @@ mitk::IGTLMessageProvider::DisconnectFrom( mitk::IGTLMessageSource* UpstreamFilt
   }
 }
 
-ITK_THREAD_RETURN_TYPE mitk::IGTLMessageProvider::TimerThread(void* pInfoStruct)
-{
-  // extract this pointer from thread info structure
-  struct itk::MultiThreader::ThreadInfoStruct * pInfo =
-      (struct itk::MultiThreader::ThreadInfoStruct*)pInfoStruct;
-  mitk::IGTLMessageProvider* thisObject =
-      static_cast<mitk::IGTLMessageProvider*>(pInfo->UserData);
-
-  itk::SimpleMutexLock mutex;
-  mutex.Lock();
-
-  thisObject->m_StopStreamingThreadMutex->Lock();
-  thisObject->m_StopStreamingThread = false;
-  thisObject->m_StopStreamingThreadMutex->Unlock();
-
-  thisObject->m_StreamingTimeMutex->Lock();
-  unsigned int waitingTime = thisObject->m_StreamingTime;
-  thisObject->m_StreamingTimeMutex->Unlock();
-
-  while (true)
-  {
-    thisObject->m_StopStreamingThreadMutex->Lock();
-    bool stopThread = thisObject->m_StopStreamingThread;
-    thisObject->m_StopStreamingThreadMutex->Unlock();
-
-    if (stopThread)
-    {
-      break;
-    }
-
-    //wait for the time given
-    //I know it is not the nicest solution but we just need an approximate time
-    //sleeps for 20 ms
-    #if defined (WIN32) || defined (_WIN32)
-    Sleep(waitingTime);
-    #else
-    usleep(waitingTime * 1000);
-    #endif
-
-    // Ask to execute that command from the GUI thread
-    mitk::CallbackFromGUIThread::GetInstance()->CallThisFromGUIThread(
-          thisObject->m_StreamingCommand);
-  }
-
-  thisObject->m_ThreadId = 0;
-
-  mutex.Unlock();
-
-  return ITK_THREAD_RETURN_VALUE;
-}
+//ITK_THREAD_RETURN_TYPE mitk::IGTLMessageProvider::TimerThread(void* pInfoStruct)
+//{
+//  // extract this pointer from thread info structure
+//  struct itk::MultiThreader::ThreadInfoStruct * pInfo =
+//      (struct itk::MultiThreader::ThreadInfoStruct*)pInfoStruct;
+//  mitk::IGTLMessageProvider* thisObject =
+//      static_cast<mitk::IGTLMessageProvider*>(pInfo->UserData);
+//
+//  itk::SimpleMutexLock mutex;
+//  mutex.Lock();
+//
+//  thisObject->m_StopStreamingThreadMutex->Lock();
+//  thisObject->m_StopStreamingThread = false;
+//  thisObject->m_StopStreamingThreadMutex->Unlock();
+//
+//  thisObject->m_StreamingTimeMutex->Lock();
+//  unsigned int waitingTime = thisObject->m_StreamingTime;
+//  thisObject->m_StreamingTimeMutex->Unlock();
+//
+//  while (true)
+//  {
+//    thisObject->m_StopStreamingThreadMutex->Lock();
+//    bool stopThread = thisObject->m_StopStreamingThread;
+//    thisObject->m_StopStreamingThreadMutex->Unlock();
+//
+//    if (stopThread)
+//    {
+//      break;
+//    }
+//
+//    //wait for the time given
+//    //I know it is not the nicest solution but we just need an approximate time
+//    //sleeps for 20 ms
+//    #if defined (WIN32) || defined (_WIN32)
+//    Sleep(waitingTime);
+//    #else
+//    usleep(waitingTime * 1000);
+//    #endif
+//
+//    // Ask to execute that command from the GUI thread
+//    mitk::CallbackFromGUIThread::GetInstance()->CallThisFromGUIThread(
+//          thisObject->m_StreamingCommand);
+//  }
+//
+//  thisObject->m_ThreadId = 0;
+//
+//  mutex.Unlock();
+//
+//  return ITK_THREAD_RETURN_VALUE;
+//}
