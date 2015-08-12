@@ -80,6 +80,11 @@ namespace mitk {
     */
     bool IsStreaming();
 
+    /**
+    * \brief Get method for the streaming time
+    */
+    itkGetMacro(StreamingTime, unsigned int);
+
   protected:
     IGTLMessageProvider();
     virtual ~IGTLMessageProvider();
@@ -174,5 +179,23 @@ namespace mitk {
     bool                                      m_IsStreaming;
 
   };
+
+  /**
+  * \brief connect to this Event to get notified when a stream is requested
+  *
+  * \note It is necessary to do the following things to have streaming support: 1. listen to this
+  * event. 2. When emitted start a timer with the given interval. 3. In the timeout method of
+  * this timer call IGTLMessageProvider::Update. 4. Also listen to the StreamingStopRequiredEvent
+  * and stop the timer imdediately.
+  * */
+  itkEventMacro(StreamingStartRequiredEvent, itk::AnyEvent);
+
+  /**
+  * \brief connect to this Event to get notified when a stream shall be stopped
+  *
+  * \note It is necessary to connect to this event and stop the streaming timer when called.
+  * */
+  itkEventMacro(StreamingStopRequiredEvent, itk::AnyEvent);
+
 } // namespace mitk
 #endif /* MITKIGTLMESSAGEPROVIDER_H_HEADER_INCLUDED_ */

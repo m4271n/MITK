@@ -51,14 +51,15 @@ mitk::IGTLMessageProvider::IGTLMessageProvider()
 
 mitk::IGTLMessageProvider::~IGTLMessageProvider()
 {
-  // terminate worker thread on destruction
-  this->m_StopStreamingThreadMutex->Lock();
-  this->m_StopStreamingThread = true;
-  this->m_StopStreamingThreadMutex->Unlock();
-  if ( m_ThreadId >= 0)
-  {
-    this->m_MultiThreader->TerminateThread(m_ThreadId);
-  }
+  //// terminate worker thread on destruction
+  //this->m_StopStreamingThreadMutex->Lock();
+  //this->m_StopStreamingThread = true;
+  //this->m_StopStreamingThreadMutex->Unlock();
+  //if ( m_ThreadId >= 0)
+  //{
+  //  this->m_MultiThreader->TerminateThread(m_ThreadId);
+  //}
+   this->InvokeEvent(StreamingStartRequiredEvent());
 }
 
 void mitk::IGTLMessageProvider::GenerateData()
@@ -234,18 +235,21 @@ void mitk::IGTLMessageProvider::StartStreamingOfSource(IGTLMessageSource* src,
     this->m_StreamingTime = 1.0 / (double) fps * 1000.0;
     this->m_StreamingTimeMutex->Unlock();
 
-    // Create a command object. The function will be called later from the
-    // main thread
-    this->m_StreamingCommand = ProviderCommand::New();
-    m_StreamingCommand->SetCallbackFunction(this,
-        &mitk::IGTLMessageProvider::Update);
+    //// Create a command object. The function will be called later from the
+    //// main thread
+    //this->m_StreamingCommand = ProviderCommand::New();
+    //m_StreamingCommand->SetCallbackFunction(this,
+    //    &mitk::IGTLMessageProvider::Update);
 
-    // For streaming we need a continues time signal, since there is no timer
-    // available we start a thread that generates a timing signal
-    // This signal is invoked from the other thread the update of the pipeline
-    // has to be executed from the main thread. Thus, we use the
-    // callbackfromGUIThread class to pass the execution to the main thread
-    this->m_ThreadId = m_MultiThreader->SpawnThread(this->TimerThread, this);
+    //// For streaming we need a continues time signal, since there is no timer
+    //// available we start a thread that generates a timing signal
+    //// This signal is invoked from the other thread the update of the pipeline
+    //// has to be executed from the main thread. Thus, we use the
+    //// callbackfromGUIThread class to pass the execution to the main thread
+    //this->m_ThreadId = m_MultiThreader->SpawnThread(this->TimerThread, this);
+
+    this->InvokeEvent(StreamingStartRequiredEvent());
+
     this->m_IsStreaming = true;
   }
   else
@@ -261,9 +265,11 @@ void mitk::IGTLMessageProvider::StopStreamingOfSource(IGTLMessageSource* src)
   //source is disconnected otherwise it can cause a crash. This has to be added!!
   this->DisconnectFrom(src);
 
-  this->m_StopStreamingThreadMutex->Lock();
-  this->m_StopStreamingThread = true;
-  this->m_StopStreamingThreadMutex->Unlock();
+  //this->m_StopStreamingThreadMutex->Lock();
+  //this->m_StopStreamingThread = true;
+  //this->m_StopStreamingThreadMutex->Unlock();
+
+  this->InvokeEvent(StreamingStopRequiredEvent());
 
   //does this flag needs a mutex???
   this->m_IsStreaming = false;
