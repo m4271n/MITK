@@ -85,6 +85,8 @@ namespace mitk {
     */
     itkGetMacro(StreamingTime, unsigned int);
 
+    virtual void Update() override;
+
   protected:
     IGTLMessageProvider();
     virtual ~IGTLMessageProvider();
@@ -177,6 +179,9 @@ namespace mitk {
 
     /** \brief flag to indicate if the provider is streaming */
     bool                                      m_IsStreaming;
+
+    /** Measurement class to calculate latency and frame count */
+    mitk::IGTLMeasurements m_Measurement;
 
   };
 
