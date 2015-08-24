@@ -78,7 +78,7 @@ mitk::IGTLMessageProvider::~IGTLMessageProvider()
 
 void mitk::IGTLMessageProvider::Update()
 {
-  long long startTime = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  long long startTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
   Superclass::Update();
 

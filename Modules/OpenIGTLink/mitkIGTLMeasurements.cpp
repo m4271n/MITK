@@ -63,7 +63,7 @@ mitk::IGTLMeasurements::~IGTLMeasurements()
 
 void mitk::IGTLMeasurements::AddMeasurement(unsigned int measurementPoint, unsigned int index, long long timestamp)
 {
-  if (timestamp==0) {timestamp = std::chrono::high_resolution_clock::now().time_since_epoch().count();}
+  if (timestamp==0) {timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();}
    if (m_IsStarted)
    {
      m_MeasurementPoints[measurementPoint].push_back(TimeStampIndexPair(timestamp,index));
@@ -102,11 +102,11 @@ bool mitk::IGTLMeasurements::ExportData(std::string filename)
    //offset = offset - offset % 1000000;
 
    //for each entry of the map
-   for each (auto entry in m_MeasurementPoints)
+   for (auto entry : m_MeasurementPoints)
    {
      *out << entry.second.size() << ";";
      *out << entry.first << ";";
-     for each (TimeStampIndexPair timestampIndexPair in entry.second)
+     for (TimeStampIndexPair timestampIndexPair : entry.second)
      {
        *out << ( timestampIndexPair.first ) << ";";
        *out << ( timestampIndexPair.second ) << ";";

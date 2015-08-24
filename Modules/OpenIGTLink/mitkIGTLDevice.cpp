@@ -218,7 +218,7 @@ unsigned int mitk::IGTLDevice::ReceivePrivate(igtl::Socket* socket)
 
 
       // measure the time
-      long long timeStamp6 = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+      long long timeStamp6 = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
 
       if ( receiveCheck > 0 )
