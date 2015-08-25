@@ -212,7 +212,7 @@ void OpenIGTLinkExample::UpdatePipeline()
 
   //check if the timer interval changed
   static int previousValue = 0;
-  int currentValue = this->m_Controls.visualizationUpdateRateSpinBox->value();
+  int currentValue = 1000.0 / this->m_Controls.visualizationUpdateRateSpinBox->value();
   if (previousValue != currentValue)
   {
     m_Timer.setInterval(currentValue);
