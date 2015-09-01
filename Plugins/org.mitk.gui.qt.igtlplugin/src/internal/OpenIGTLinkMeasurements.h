@@ -48,6 +48,7 @@ class OpenIGTLinkMeasurements : public QmitkAbstractView
 
     void StartStopButtonClicked();
     void ExportButtonClicked();
+    void SetMaxMeasurementPoints();
 
 
   protected:

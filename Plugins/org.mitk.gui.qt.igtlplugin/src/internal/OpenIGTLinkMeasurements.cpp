@@ -41,6 +41,8 @@ void OpenIGTLinkMeasurements::CreateQtPartControl( QWidget *parent )
     this, SLOT(ExportButtonClicked()));
   connect(m_Controls.startButton, SIGNAL(clicked()),
     this, SLOT(StartStopButtonClicked()));
+  connect(m_Controls.maxPointsSpinBox, SIGNAL(valueChanged(int)),
+    this, SLOT(SetMaxMeasurementPoints()));
 }
 
 void OpenIGTLinkMeasurements::StartStopButtonClicked()
@@ -49,6 +51,8 @@ void OpenIGTLinkMeasurements::StartStopButtonClicked()
   {
     //reset the measurements
     this->m_Measurements->Reset();
+    //set the amount of measurement points
+    this->m_Measurements->SetMaxMeasurementPoints(this->m_Controls.maxPointsSpinBox->value());
     //start the measurements
     this->m_Measurements->SetStarted(true);
     //adapt the gui
@@ -65,6 +69,11 @@ void OpenIGTLinkMeasurements::StartStopButtonClicked()
 
 void OpenIGTLinkMeasurements::ExportButtonClicked()
 {
-   if (!m_Measurements->ExportData("MeasurementOutput.txt"))
-      MITK_ERROR("OpenIGTLinkMeasurements") << "export did not work!!!";
+  if (!m_Measurements->ExportData("MeasurementOutput.txt"))
+    MITK_ERROR("OpenIGTLinkMeasurements") << "export did not work!!!";
+}
+
+void OpenIGTLinkMeasurements::SetMaxMeasurementPoints()
+{
+  this->m_Measurements->SetMaxMeasurementPoints(this->m_Controls.maxPointsSpinBox->value());
 }

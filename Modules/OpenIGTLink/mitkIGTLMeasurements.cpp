@@ -28,6 +28,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 mitk::IGTLMeasurements::IGTLMeasurements()
 {
+  m_MaxPoints = 0;
 }
 
 mitk::IGTLMeasurements* mitk::IGTLMeasurements::GetInstance()
@@ -63,11 +64,20 @@ mitk::IGTLMeasurements::~IGTLMeasurements()
 
 void mitk::IGTLMeasurements::AddMeasurement(unsigned int measurementPoint, unsigned int index, long long timestamp)
 {
-  if (timestamp==0) {timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();}
-   if (m_IsStarted)
-   {
-     m_MeasurementPoints[measurementPoint].push_back(TimeStampIndexPair(timestamp,index));
-   }
+  if (timestamp == 0)
+  {
+    timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+  }
+  if (m_IsStarted)
+  {
+    m_MeasurementPoints[measurementPoint].push_back(TimeStampIndexPair(timestamp, index));
+    //check if maximal number is reached => then we stop
+    if (m_MeasurementPoints[measurementPoint].size() >= m_MaxPoints && m_MaxPoints != 0)
+    {
+      m_IsStarted = false;
+    }
+  }
 }
 
 bool mitk::IGTLMeasurements::ExportData(std::string filename)
@@ -130,4 +140,9 @@ void mitk::IGTLMeasurements::Reset()
 void mitk::IGTLMeasurements::SetStarted(bool started)
 {
   m_IsStarted = started;
+}
+
+void mitk::IGTLMeasurements::SetMaxMeasurementPoints(unsigned int maxPoints)
+{
+  m_MaxPoints = maxPoints;
 }

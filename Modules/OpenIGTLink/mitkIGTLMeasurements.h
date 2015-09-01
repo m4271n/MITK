@@ -97,7 +97,17 @@ namespace mitk {
     */
     void Reset();
 
+    /**
+    * \brief Starts/stops the measurement
+    */
     void SetStarted(bool started);
+
+    /**
+    * \brief Sets the maximum number of measurement points
+    *
+    * If not set it will never stop the measurment
+    */
+    void SetMaxMeasurementPoints(unsigned int maxPoints);
 
   private:
     // Only our module activator class should be able to instantiate
@@ -124,6 +134,8 @@ namespace mitk {
     MeasurementPoints                               m_MeasurementPoints;
 
     bool m_IsStarted;
+
+    unsigned int m_MaxPoints;
   };
 } // namespace mitk
 #endif /* MITKIGTLMeasurements_H_HEADER_INCLUDED_ */
