@@ -106,7 +106,7 @@ bool mitk::IGTLMeasurements::ExportData(std::string filename)
    out->precision(15); // rounding precision because we don't want to loose data.
 
    //define an offset that will be subtracted from all timestamps in order to save space
-   long long offset = m_MeasurementPoints.begin()->second.front().first;
+   //long long offset = m_MeasurementPoints.begin()->second.front().first;
    //the offset shall be the first entry in the map but without its last 6 digits
    //timestamp is given in microseconds (?)
    //offset = offset - offset % 1000000;

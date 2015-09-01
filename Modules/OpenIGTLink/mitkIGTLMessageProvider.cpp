@@ -247,6 +247,10 @@ void mitk::IGTLMessageProvider::OnIncomingCommand()
     {
       this->StopStreamingOfSource(source);
     }
+    else if ( isRTSMsg )
+    {
+      //not implemented so far
+    }
     else
     {
       //do nothing
