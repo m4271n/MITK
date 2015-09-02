@@ -499,6 +499,10 @@ igtl::MessageBase::Pointer mitk::IGTLDevice::GetNextMessage()
   //copy the next message into the given msg
   igtl::MessageBase::Pointer msg = this->m_ReceiveQueue->PullMessage();
 
+  // measure the time
+  long long timeStamp8 = std::chrono::duration_cast<std::chrono::microseconds>(
+    std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
   if (msg.IsNotNull())
   {
     igtl::TrackingDataMessage* tdMsg =
@@ -507,10 +511,10 @@ igtl::MessageBase::Pointer mitk::IGTLDevice::GetNextMessage()
     tdMsg->GetTrackingDataElement(0,trackingData);
     float x_pos, y_pos, z_pos;
     trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
-    m_Measurement->AddMeasurement(8,x_pos); //x value is used as index
-    unsigned int seconds = 0;
-    unsigned int frac = 0;
-    msg->GetTimeStamp(&seconds, &frac);
+    m_Measurement->AddMeasurement(8, x_pos, timeStamp8); //x value is used as index
+    //unsigned int seconds = 0;
+    //unsigned int frac = 0;
+    //msg->GetTimeStamp(&seconds, &frac);
     //std::cout << "8: s: " << seconds << " f: " << frac << std::endl;
   }
 
