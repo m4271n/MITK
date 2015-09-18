@@ -27,10 +27,9 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 #include <igtl_status.h>
 
-//remove later
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
 #include <igtlTrackingDataMessage.h>
-
-#include <igtlTrackingDataMessage.h>
+#endif
 
 static const int SOCKET_SEND_RECEIVE_TIMEOUT_MSEC = 1;
 
@@ -230,6 +229,7 @@ unsigned int mitk::IGTLDevice::ReceivePrivate(igtl::Socket* socket)
           return IGTL_STATUS_CHECKSUM_ERROR;
         }
 
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
         //save timestamp 6 now because we know the index
         igtl::TrackingDataMessage* tdMsg =
           (igtl::TrackingDataMessage*)(curMessage.GetPointer());
@@ -238,6 +238,7 @@ unsigned int mitk::IGTLDevice::ReceivePrivate(igtl::Socket* socket)
         float x_pos, y_pos, z_pos;
         trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
         m_Measurement->AddMeasurement(6,x_pos,timeStamp6); //x value is used as index
+#endif
 
         //check the type of the received message
         //if it is a command push it into the command queue
@@ -251,6 +252,7 @@ unsigned int mitk::IGTLDevice::ReceivePrivate(igtl::Socket* socket)
         }
         else
         {
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
           igtl::TrackingDataMessage* tdMsg =
             (igtl::TrackingDataMessage*)(curMessage.GetPointer());
           igtl::TrackingDataElement::Pointer trackingData = igtl::TrackingDataElement::New();
@@ -258,6 +260,7 @@ unsigned int mitk::IGTLDevice::ReceivePrivate(igtl::Socket* socket)
           float x_pos, y_pos, z_pos;
           trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
           m_Measurement->AddMeasurement(7,x_pos); //x value is used as index
+#endif
           this->m_ReceiveQueue->PushMessage(curMessage);
           this->InvokeEvent(MessageReceivedEvent());
         }
@@ -291,6 +294,7 @@ void mitk::IGTLDevice::SendMessage(const mitk::IGTLMessage* msg)
 
 void mitk::IGTLDevice::SendMessage(igtl::MessageBase::Pointer msg)
 {
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
   igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(msg.GetPointer());
   igtl::TrackingDataElement::Pointer trackingData = igtl::TrackingDataElement::New();
@@ -298,6 +302,7 @@ void mitk::IGTLDevice::SendMessage(igtl::MessageBase::Pointer msg)
   float x_pos, y_pos, z_pos;
   trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
   m_Measurement->AddMeasurement(3,x_pos); //x value is used as index
+#endif
   //add the message to the queue
   m_SendQueue->PushMessage(msg);
 }
@@ -319,6 +324,7 @@ unsigned int mitk::IGTLDevice::SendMessagePrivate(igtl::MessageBase::Pointer msg
   // Pack (serialize) and send
   msg->Pack();
 
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
   // measure the time
   igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(msg.GetPointer());
@@ -327,6 +333,7 @@ unsigned int mitk::IGTLDevice::SendMessagePrivate(igtl::MessageBase::Pointer msg
   float x_pos, y_pos, z_pos;
   trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
   m_Measurement->AddMeasurement(5,x_pos); //x value is used as index
+#endif
 
   int sendSuccess = socket->Send(msg->GetPackPointer(), msg->GetPackSize());
 
@@ -501,6 +508,7 @@ igtl::MessageBase::Pointer mitk::IGTLDevice::GetNextMessage()
 
   if (msg.IsNotNull())
   {
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
     igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(msg.GetPointer());
     igtl::TrackingDataElement::Pointer trackingData = igtl::TrackingDataElement::New();
@@ -512,6 +520,7 @@ igtl::MessageBase::Pointer mitk::IGTLDevice::GetNextMessage()
     unsigned int frac = 0;
     msg->GetTimeStamp(&seconds, &frac);
     //std::cout << "8: s: " << seconds << " f: " << frac << std::endl;
+#endif
   }
 
   return msg;

@@ -142,6 +142,7 @@ void mitk::IGTLServer::Send()
   if ( curMessage.IsNull() )
     return;
 
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
   igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(curMessage.GetPointer());
   igtl::TrackingDataElement::Pointer trackingData = igtl::TrackingDataElement::New();
@@ -149,6 +150,7 @@ void mitk::IGTLServer::Send()
   float x_pos, y_pos, z_pos;
   trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
   m_Measurement->AddMeasurement(4,x_pos); //x value is used as index
+#endif
 
   //the server can be connected with several clients, therefore it has to check
   //all registered clients

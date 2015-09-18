@@ -61,7 +61,7 @@ namespace mitk {
     /**
     * \brief Get the number of messages in the queue
     */
-    int GetSize();
+    unsigned int GetSize();
 
     /**
     * \brief Returns a string with information about the oldest message in the

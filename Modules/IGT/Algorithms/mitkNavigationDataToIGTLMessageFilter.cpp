@@ -64,6 +64,7 @@ void mitk::NavigationDataToIGTLMessageFilter::GenerateData()
   default:
     break;
   }
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
   igtl::MessageBase::Pointer curMessage = this->GetOutput()->GetMessage();
   igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(curMessage.GetPointer());
@@ -72,6 +73,7 @@ void mitk::NavigationDataToIGTLMessageFilter::GenerateData()
   float x_pos, y_pos, z_pos;
   trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
   m_Measurement->AddMeasurement(2,x_pos); //x value is used as index
+#endif
 }
 
 

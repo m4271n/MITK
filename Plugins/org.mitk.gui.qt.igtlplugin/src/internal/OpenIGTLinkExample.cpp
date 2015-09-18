@@ -177,7 +177,13 @@ void OpenIGTLinkExample::UpdatePipeline()
   {
     //update the pipeline
     m_VisFilter->Update();
-    if(m_VisFilter->GetOutput() != nullptr) {m_Measurement->AddMeasurement(10,m_VisFilter->GetOutput()->GetPosition()[0]);} //x value is used as index
+
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
+    if(m_VisFilter->GetOutput() != nullptr)
+    {
+      m_Measurement->AddMeasurement(10,m_VisFilter->GetOutput()->GetPosition()[0]);
+    } //x value is used as index
+#endif
 
     ////update the boundings
     //mitk::RenderingManager::GetInstance()->InitializeViewsByBoundingObjects(this->GetDataStorage());
@@ -201,7 +207,9 @@ void OpenIGTLinkExample::UpdatePipeline()
 
     if ( !mitk::Equal( *(previousND.GetPointer()), *curND ) )
     {
-      m_Measurement->AddMeasurement(9,curND->GetPosition()[0]);//x value is used as index
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
+      m_Measurement->AddMeasurement(9, curND->GetPosition()[0]);//x value is used as index
+#endif
       //previousTimestamp = curTimestamp;
       previousND->Graft(curND);
     }

@@ -84,6 +84,7 @@ void mitk::IGTLMessageProvider::Update()
 
   if (this->GetInput() != nullptr)
   {
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
     igtl::MessageBase::Pointer curMessage = this->GetInput()->GetMessage();
     igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(curMessage.GetPointer());
@@ -92,6 +93,7 @@ void mitk::IGTLMessageProvider::Update()
     float x_pos, y_pos, z_pos;
     trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
     m_Measurement->AddMeasurement(1,x_pos,startTime); //x value is used as index
+#endif
   }
 }
 

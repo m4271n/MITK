@@ -106,7 +106,7 @@ void mitk::IGTLClient::Send()
   if ( curMessage.IsNull() )
     return;
 
-
+#ifdef OPENIGTLINK_TESTING_ACTIVATED
   igtl::TrackingDataMessage* tdMsg =
       (igtl::TrackingDataMessage*)(curMessage.GetPointer());
   igtl::TrackingDataElement::Pointer trackingData = igtl::TrackingDataElement::New();
@@ -114,6 +114,7 @@ void mitk::IGTLClient::Send()
   float x_pos, y_pos, z_pos;
   trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
   m_Measurement->AddMeasurement(4,x_pos); //x value is used as index
+#endif
 
   if ( this->SendMessagePrivate(curMessage.GetPointer(), this->m_Socket) )
   {

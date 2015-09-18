@@ -115,7 +115,7 @@ std::string mitk::IGTLMessageQueue::GetLatestMsgDeviceType()
   return s.str();
 }
 
-int mitk::IGTLMessageQueue::GetSize()
+unsigned int mitk::IGTLMessageQueue::GetSize()
 {
   return this->m_Queue.size();
 }

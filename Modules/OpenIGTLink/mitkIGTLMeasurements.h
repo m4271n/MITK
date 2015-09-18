@@ -25,6 +25,9 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "itkObject.h"
 #include "mitkCommon.h"
 
+#define OPENIGTLINK_TESTING_ACTIVATED
+#undef OPENIGTLINK_TESTING_ACTIVATED
+
 namespace mitk {
 
    ///**
