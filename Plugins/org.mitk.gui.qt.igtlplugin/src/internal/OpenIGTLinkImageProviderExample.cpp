@@ -56,7 +56,7 @@ class MockImageSource : public mitk::ImageSource
 
       void GenerateData() override
   {
-    this->m_Image = mitk::Image::New();
+    //this->m_Image = mitk::Image::New();
 
     mitk::PixelType type =
         mitk::MakePixelType<unsigned char, unsigned char, 1>();
@@ -159,6 +159,8 @@ void OpenIGTLinkImageProviderExample::CreateQtPartControl(QWidget* parent)
 
   connect(m_Controls.m_startPipeline, SIGNAL(clicked()), this,
           SLOT(OnStartPipeline()));
+
+  connect(&timer, SIGNAL(timeout()), this, SLOT(OnTimerTimeout()));
 }
 
 void OpenIGTLinkImageProviderExample::OnStartPipeline()
@@ -195,6 +197,14 @@ void OpenIGTLinkImageProviderExample::CreatePipeline()
   // requested this data type then the provider will connect with this filter
   // automatically.
   m_ImageToIGTLMsgFilter->RegisterAsMicroservice();
+
+  timer.start(30);
 }
 
 void OpenIGTLinkImageProviderExample::DestroyPipeline() {}
+
+void OpenIGTLinkImageProviderExample::OnTimerTimeout()
+{
+  m_Source->Modified();
+  //m_ImageToIGTLMsgFilter->Modified();
+}

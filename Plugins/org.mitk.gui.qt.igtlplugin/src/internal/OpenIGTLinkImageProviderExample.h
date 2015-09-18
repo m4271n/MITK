@@ -55,6 +55,7 @@ class OpenIGTLinkImageProviderExample : public QmitkAbstractView
   protected slots:
 
     void OnStartPipeline();
+    void OnTimerTimeout();
 
   protected:
 
@@ -70,6 +71,7 @@ class OpenIGTLinkImageProviderExample : public QmitkAbstractView
     mitk::IGTLMessageProvider::Pointer m_IGTLMessageProvider;
     mitk::ImageToIGTLMessageFilter::Pointer m_ImageToIGTLMsgFilter;
     mitk::ImageSource::Pointer m_Source;
+    QTimer timer;
 };
 
 #endif // OpenIGTLinkImageProviderExample_h
