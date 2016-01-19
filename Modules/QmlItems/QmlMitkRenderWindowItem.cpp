@@ -60,7 +60,8 @@ QmlMitkRenderWindowItem
                           mitk::RenderingManager* renderingManager)
 : QVTKQuickItem(parent)
 {
-  mitk::RenderWindowBase::Initialize( renderingManager, name.toStdString().c_str() );
+  QString uniqueName = GetUniqueName(name);
+  mitk::RenderWindowBase::Initialize(renderingManager, uniqueName.toStdString().c_str());
 
   /* from QmitkRenderWindow. Required?
   setFocusPolicy(Qt::StrongFocus);
@@ -68,6 +69,34 @@ QmlMitkRenderWindowItem
   */
 
   GetInstances()[QVTKQuickItem::GetRenderWindow()] = this;
+}
+
+// checks the previously created render window items for their names, in case the name already
+// exists it will add a index number at the end of the name in order to make it unique.
+// this is just a workaround and shouldnt be necessary, however, caused by the current QML
+// architecture the constructor is called with standard parameters (see above). So all instances
+// would have the same name. It would be optimal to define a name in the QML file and use this name
+// here in the constructor but with the current architecture it is not working. The constructor is
+// called automatically in a generic way. A second option would be to first construct the render
+// window item and subsequently set the name but as far as I know MITK does not allow the change of
+// the name after the construction.
+QString QmlMitkRenderWindowItem::GetUniqueName(const QString& name)
+{
+   static unsigned int nameCounter = 1;
+   QString uniqueName = name;
+
+   //check the other instances if they have the same name
+   for each (auto instance in GetInstances())
+   {
+      //check if the name of the current item in the map is the same as the one of the current item
+      if (uniqueName.compare(instance->GetRenderer()->GetName()) == 0)
+      {
+         //they are the same => add an index at the end
+         uniqueName.append(QString::number(nameCounter++));
+         break;
+      }
+   }
+   return uniqueName;
 }
 
 // called from QVTKQuickItem when window is painted for the first time!
@@ -136,6 +165,7 @@ mitk::Point2D QmlMitkRenderWindowItem::GetMousePosition(QMouseEvent* me) const
   mitk::Point2D point;
   point[0] = me->x();
   point[1] = me->y();
+  m_Renderer->GetDisplayGeometry()->ULDisplayToDisplay(point, point);
   return point;
 }
 
@@ -144,6 +174,7 @@ mitk::Point2D QmlMitkRenderWindowItem::GetMousePosition(QWheelEvent* we) const
   mitk::Point2D point;
   point[0] = we->x();
   point[1] = we->y();
+  m_Renderer->GetDisplayGeometry()->ULDisplayToDisplay(point, point);
   return point;
 }
 
@@ -283,19 +314,22 @@ void QmlMitkRenderWindowItem::mouseMoveEvent(QMouseEvent* me)
   mitk::MouseMoveEvent::Pointer mMoveEvent =
     mitk::MouseMoveEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me));
 
-#if defined INTERACTION_LEGACY
-  bool modernInteractorHandledEvent =
-#endif
-  mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
-#if defined INTERACTION_LEGACY
-  if (!modernInteractorHandledEvent)
-  {
-    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
-    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
-  }
-#endif
+//#if defined INTERACTION_LEGACY
+//  bool modernInteractorHandledEvent =
+//#endif
+  bool isHandled = mitk::RenderWindowBase::HandleEvent(mMoveEvent.GetPointer());
+//#if defined INTERACTION_LEGACY
+//  if (!modernInteractorHandledEvent)
+//  {
+//    mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+//    mitk::RenderWindowBase::mouseMoveMitkEvent(&myevent);
+//  }
+//#endif
 
-  QVTKQuickItem::mouseMoveEvent(me);
+  if (!isHandled)
+  {
+     QVTKQuickItem::mouseMoveEvent(me);
+  }
 
 // TODO: why was this not put here initially? What is special about mouse move?
 //  if (m_ResendQtEvents)
@@ -325,6 +359,58 @@ void QmlMitkRenderWindowItem::wheelEvent(QWheelEvent *we)
 
 //  if (m_ResendQtEvents)
 //    we->ignore();
+}
+
+
+void QmlMitkRenderWindowItem::keyPressEvent(QKeyEvent * e)
+{
+//   mitk::Point2D mousePosition = GetMousePosition(me);
+//   mitk::Point3D worldPosition = mitk::RenderWindowBase::GetRenderer()->Map2DRendererPositionTo3DWorldPosition(mousePosition);
+//   mitk::MousePressEvent::Pointer mPressEvent =
+//      mitk::MousePressEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
+//
+//#if defined INTERACTION_LEGACY
+//   bool modernInteractorHandledEvent =
+//#endif
+//      mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
+//#if defined INTERACTION_LEGACY
+//   if (!modernInteractorHandledEvent)
+//   {
+//      mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+//      mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
+//   }
+//#endif
+
+   QVTKQuickItem::keyPressEvent(e);
+
+   //  if (m_ResendQtEvents)
+   //    me->ignore();
+}
+
+
+void QmlMitkRenderWindowItem::keyReleaseEvent(QKeyEvent * e)
+{
+   //   mitk::Point2D mousePosition = GetMousePosition(me);
+   //   mitk::Point3D worldPosition = mitk::RenderWindowBase::GetRenderer()->Map2DRendererPositionTo3DWorldPosition(mousePosition);
+   //   mitk::MousePressEvent::Pointer mPressEvent =
+   //      mitk::MousePressEvent::New(mitk::RenderWindowBase::GetRenderer(), mousePosition, worldPosition, GetButtonState(me), GetModifiers(me), GetEventButton(me));
+   //
+   //#if defined INTERACTION_LEGACY
+   //   bool modernInteractorHandledEvent =
+   //#endif
+   //      mitk::RenderWindowBase::HandleEvent(mPressEvent.GetPointer());
+   //#if defined INTERACTION_LEGACY
+   //   if (!modernInteractorHandledEvent)
+   //   {
+   //      mitk::MouseEvent myevent(QmitkEventAdapter::AdaptMouseEvent(mitk::RenderWindowBase::GetRenderer(), me));
+   //      mitk::RenderWindowBase::mousePressMitkEvent(&myevent);
+   //   }
+   //#endif
+
+   QVTKQuickItem::keyReleaseEvent(e);
+
+   //  if (m_ResendQtEvents)
+   //    me->ignore();
 }
 
 
