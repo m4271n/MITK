@@ -32,7 +32,9 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkInternalEvent.h"
 #include "mitkPlaneGeometryDataMapper2D.h"
 
-#include "QmlMitkBigRenderLock.h"
+#include "QmlFboGeometry.h"
+#include <QEvent>
+#include <limits>
 
 #define INTERACTION_LEGACY // TODO: remove INTERACTION_LEGACY!
 
@@ -41,9 +43,33 @@ See LICENSE.txt or http://www.mitk.org for details.
   #include "mitkGlobalInteraction.h"
 #endif
 
+
+QMutex QmlMitkRenderWindowItem::s_MitkRendererDataLock(QMutex::Recursive);
+
+class QVTKQuickItemStartedRenderingEvent : public QEvent
+{
+public:
+  static QEvent::Type QVTKQuickItemStartedRendering;
+  QVTKQuickItemStartedRenderingEvent() : QEvent( QVTKQuickItemStartedRendering ) {}
+};
+QEvent::Type QVTKQuickItemStartedRenderingEvent::QVTKQuickItemStartedRendering = static_cast<QEvent::Type>(QEvent::registerEventType());
+
+class QVTKQuickItemFinishedRenderingEvent : public QEvent
+{
+public:
+  static QEvent::Type QVTKQuickItemFinishedRendering;
+  QVTKQuickItemFinishedRenderingEvent() : QEvent( QVTKQuickItemFinishedRendering ) {}
+};
+QEvent::Type QVTKQuickItemFinishedRenderingEvent::QVTKQuickItemFinishedRendering = static_cast<QEvent::Type>(QEvent::registerEventType());
+
+
 QmlMitkRenderWindowItem* QmlMitkRenderWindowItem::GetInstanceForVTKRenderWindow( vtkRenderWindow* rw )
 {
-  return GetInstances()[rw];
+  if (GetInstances().contains(rw))
+  {
+    return GetInstances()[rw];
+  }
+  return 0;
 }
 
 QMap<vtkRenderWindow*, QmlMitkRenderWindowItem*>& QmlMitkRenderWindowItem::GetInstances()
@@ -62,6 +88,11 @@ QmlMitkRenderWindowItem
 {
   QString uniqueName = GetUniqueName(name);
   mitk::RenderWindowBase::Initialize(renderingManager, uniqueName.toStdString().c_str());
+
+  // Replace the default DisplayGeometry with one in which the upper-left
+  // corner of the view port is the origin of the "Display" coordinate frame.
+  mitk::QmlFboGeometry::Pointer qmlFboGeometry = mitk::QmlFboGeometry::New( GetRenderer()->GetDisplayGeometry() );
+  GetRenderer()->SetDisplayGeometry(qmlFboGeometry.GetPointer());
 
   /* from QmitkRenderWindow. Required?
   setFocusPolicy(Qt::StrongFocus);
@@ -104,10 +135,10 @@ void QmlMitkRenderWindowItem::init()
 {
   QVTKQuickItem::init();
 
-  mitk::DataStorage::Pointer m_DataStorage = mitk::RenderWindowBase::GetRenderer()->GetDataStorage();
-  if (m_DataStorage.IsNotNull())
+  mitk::DataStorage::Pointer dataStorage = mitk::RenderWindowBase::GetRenderer()->GetDataStorage();
+  if (dataStorage.IsNotNull())
   {
-    mitk::RenderingManager::GetInstance()->InitializeViews( m_DataStorage->ComputeBoundingGeometry3D(m_DataStorage->GetAll()) );
+    mitk::RenderingManager::GetInstance()->InitializeViews( dataStorage->ComputeBoundingGeometry3D(dataStorage->GetAll()) );
   }
 
   // TODO the following code needs to be moved to a multi-widget item
@@ -117,7 +148,7 @@ void QmlMitkRenderWindowItem::init()
   }
 
   if ( mitk::RenderWindowBase::GetRenderer()->GetMapperID() == mitk::BaseRenderer::Standard2D
-      && m_DataStorage.IsNotNull() )
+      && dataStorage.IsNotNull() )
   {
 
     mitk::DataNode::Pointer planeNode = mitk::RenderWindowBase::GetRenderer()->GetCurrentWorldGeometry2DNode();
@@ -140,23 +171,18 @@ void QmlMitkRenderWindowItem::init()
     planeNode->SetProperty("helper object", mitk::BoolProperty::New(true) );
 
     mitk::PlaneGeometryDataMapper2D::Pointer mapper = mitk::PlaneGeometryDataMapper2D::New();
+    //mapper->SetDatastorageAndGeometryBaseNode( dataStorage, m_PlaneNodeParent );
     planeNode->SetMapper( mitk::BaseRenderer::Standard2D, mapper );
 
-    m_DataStorage->Add( planeNode, m_PlaneNodeParent );
+    dataStorage->Add( planeNode, m_PlaneNodeParent );
   }
 }
-
-void QmlMitkRenderWindowItem::InitView( mitk::BaseRenderer::MapperSlotId mapperID,
-                                        mitk::SliceNavigationController::ViewDirection viewDirection )
-{
-  m_MapperID = mapperID;
-  m_ViewDirection = viewDirection;
-}
+  
 
 
 void QmlMitkRenderWindowItem::SetDataStorage(mitk::DataStorage::Pointer storage)
 {
-  m_DataStorage = storage;
+  mitk::RenderWindowBase::GetRenderer()->SetDataStorage(storage);
 }
 
 mitk::Point2D QmlMitkRenderWindowItem::GetMousePosition(QMouseEvent* me) const
@@ -414,17 +440,36 @@ void QmlMitkRenderWindowItem::keyReleaseEvent(QKeyEvent * e)
 }
 
 
-void QmlMitkRenderWindowItem::prepareForRender()
+bool QmlMitkRenderWindowItem::prepareForRender()
 {
-//  Adjust camera is kaputt wenn nicht der renderingmanager dem vtkprop bescheid sagt!
-//  this is just a workaround
-  QmlMitkBigRenderLock::GetMutex().lock();
-  mitk::RenderWindowBase::GetRenderer()->ForceImmediateUpdate();
+   //  If not able to get the render lock within a timeout (20 millsec), then give up and return false.
+  if (!s_MitkRendererDataLock.tryLock())
+  {
+    // The GUI loop has not had enough time to process events delayed during
+    // the previous render update so we return false to indicate that we are
+    // not ready to render
+    MITK_WARN << "Skipping render update to prevent GUI loop starvation";
+    return false;
+  }
+  QCoreApplication::postEvent(this, new QVTKQuickItemStartedRenderingEvent, INT_MAX);
+  mitk::VtkPropRenderer *vPR = dynamic_cast<mitk::VtkPropRenderer*>(mitk::BaseRenderer::GetInstance( this->GetRenderWindow() ));
+  if(vPR)
+  {
+    vPR->PrepareRender();
+  }
+  return true;
 }
 
 void QmlMitkRenderWindowItem::cleanupAfterRender()
 {
-  QmlMitkBigRenderLock::GetMutex().unlock();
+  // QVTKQuickItemFinishedRenderingEvent to itself with the default
+  // priority. Since all instances of QmlMitkRenderWindowItem live in the GUI
+  // thread, this event will get added to the GUI event queue and will be
+  // processed after all events already in the GUI event queue except for any
+  // that were posted with lower than the default priority
+  // (e.g. Qt::LowPriorityEvent).
+  QCoreApplication::postEvent(this, new QVTKQuickItemFinishedRenderingEvent);
+  s_MitkRendererDataLock.unlock();
 }
 
 void QmlMitkRenderWindowItem::SetCrossHairPositioningOnClick(bool enabled)
@@ -461,4 +506,30 @@ vtkRenderWindowInteractor* QmlMitkRenderWindowItem::GetVtkRenderWindowInteractor
   return QVTKQuickItem::GetInteractor();
 }
 
+bool QmlMitkRenderWindowItem::event(QEvent *e)
+{
+  if (e->type() == QVTKQuickItemStartedRenderingEvent::QVTKQuickItemStartedRendering)
+  {
+    // Rendering started - block GUI loop until ...
+    s_MitkRendererDataLock.lock();
+    return true;
+  }
+  else if (e->type() == QVTKQuickItemFinishedRenderingEvent::QVTKQuickItemFinishedRendering)
+  {
+    // ... rendering is finished
+    s_MitkRendererDataLock.unlock();
+    return true;
+  }
+  else
+  {
+    // Workaround for occasional Event that "slip through" during the brief
+    // window of time between when the QSG synchronize phase unblocks the GUI
+    // thread and when the QVTKQuickItemStartedRendering event is processed
+    // and blocks the GUI thread again.
+    /// @todo Exactly how/where does the QSG block the GUI thread??
+    s_MitkRendererDataLock.lock();
+    s_MitkRendererDataLock.unlock();
 
+    return QVTKQuickItem::event(e);
+  }
+}

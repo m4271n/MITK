@@ -1,3 +1,18 @@
+/*===================================================================
+
+The Medical Imaging Interaction Toolkit (MITK)
+
+Copyright (c) German Cancer Research Center,
+Division of Medical and Biological Informatics.
+All rights reserved.
+
+This software is distributed WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.
+
+See LICENSE.txt or http://www.mitk.org for details.
+
+===================================================================*/
 
 #include "QmlMitkFourRenderWindowWidget.h"
 
@@ -8,8 +23,6 @@
 #include "mitkDataNodeFactory.h"
 #include "mitkGlobalInteraction.h"
 #include "mitkImage.h"
-
-#include "QmlMitkBigRenderLock.h"
 
 mitk::DataStorage::Pointer FillDataStorage(int argc, char **argv)
 {
@@ -108,7 +121,5 @@ int main(int argc, char **argv)
 
     view.show();
 
-    QmlMitkBigRenderLock giantRenderLock;
-    app.installEventFilter(&giantRenderLock);
     return app.exec();
 }

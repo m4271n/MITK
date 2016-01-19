@@ -21,6 +21,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkRenderWindowBase.h"
 
 #include <QTimer>
+#include <QMutex>
 
 #include "MitkQmlItemsExports.h"
 
@@ -56,6 +57,9 @@ public:
 
     void SetCrossHairPositioningOnClick(bool enabled);
 
+    // QObject interface
+    virtual bool event(QEvent *);
+
 signals:
 
 public slots:
@@ -65,7 +69,7 @@ protected slots:
 protected:
 
   virtual void init() override;
-  virtual void prepareForRender() override;
+  virtual bool prepareForRender() override;
   virtual void cleanupAfterRender() override;
 
   mitk::Point2D GetMousePosition(QMouseEvent* me) const;
@@ -85,22 +89,14 @@ protected:
   virtual void keyReleaseEvent(QKeyEvent * e);
 
   QString GetUniqueName(const QString& name);
+
 private slots:
+  static QMap<vtkRenderWindow*, QmlMitkRenderWindowItem*>& GetInstances();
 
 private:
-    mitk::DataStorage::Pointer m_DataStorage;
-    mitk::DataNode::Pointer m_PlaneNodeParent;
-
-    mitk::BaseRenderer::MapperSlotId m_MapperID;
-    mitk::SliceNavigationController::ViewDirection m_ViewDirection;
-
-
-    QTimer m_Animation;
-
-    vtkSmartPointer<vtkEventQtSlotConnect> m_connect;
-
-    static QMap<vtkRenderWindow*, QmlMitkRenderWindowItem*>& GetInstances();
-
+  mitk::DataNode::Pointer m_PlaneNodeParent;
+  
+  static QMutex s_MitkRendererDataLock;
 };
 
 #endif
