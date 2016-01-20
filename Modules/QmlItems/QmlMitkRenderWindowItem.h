@@ -56,6 +56,8 @@ public:
 
     void SetCrossHairPositioningOnClick(bool enabled);
 
+    bool SendEvent(QEvent* event) { return this->event(event); };
+
 signals:
 
 public slots:
