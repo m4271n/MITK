@@ -21,6 +21,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkIGTLMessageSource.h>
 #include <mitkImage.h>
 #include <mitkImageSource.h>
+#include <mitkIGTLMeasurements.h>
 
 namespace mitk
 {
@@ -92,6 +93,9 @@ class MITKOPENIGTLINK_EXPORT ImageToIGTLMessageFilter : public IGTLMessageSource
   virtual void CreateOutputsForAllInputs();
 
   mitk::ImageSource* m_Upstream;
+
+  /** Measurement class to calculate latency and frame count */
+  mitk::IGTLMeasurements* m_Measurement;
 };
 }  // namespace mitk
 

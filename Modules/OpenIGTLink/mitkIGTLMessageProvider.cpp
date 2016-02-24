@@ -35,6 +35,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "igtlBindMessage.h"
 #include "igtlQuaternionTrackingDataMessage.h"
 #include "igtlTrackingDataMessage.h"
+#include "igtlImageMessage.h"
 
 #ifndef WIN32
 #include <unistd.h>
@@ -94,6 +95,12 @@ void mitk::IGTLMessageProvider::Update()
       float x_pos, y_pos, z_pos;
       trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
       m_Measurement->AddMeasurement(1, x_pos, startTime); //x value is used as index
+    }
+    else if (dynamic_cast<igtl::ImageMessage*>(curMessage.GetPointer()) != nullptr)
+    {
+       igtl::ImageMessage* imageMessage = (igtl::ImageMessage*)(curMessage.GetPointer());
+       unsigned int* index = (unsigned int*)imageMessage->GetScalarPointer();
+       m_Measurement->AddMeasurement(1, *index, startTime); //first four pixels are used as index
     }
   }
 }

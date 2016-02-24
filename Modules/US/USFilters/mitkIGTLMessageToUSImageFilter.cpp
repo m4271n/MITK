@@ -17,6 +17,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkIGTLMessageToUSImageFilter.h>
 #include <igtlImageMessage.h>
 #include <itkByteSwapper.h>
+#include <mitkImageReadAccessor.h>
 
 void mitk::IGTLMessageToUSImageFilter::GetNextRawImage(
   mitk::Image::Pointer& img)
@@ -69,6 +70,21 @@ void mitk::IGTLMessageToUSImageFilter::GetNextRawImage(
     break;
   default:
     mitkThrow() << "Incompatible PixelType " << imgMsg;
+  }
+
+  //TIMESTAMP?
+  static mitk::Image::Pointer previousImage = mitk::Image::New();
+
+  //std::cout << "9: igt timestamp: " << curND->GetIGTTimeStamp() << std::endl;
+  //std::cout << "9: timestamp: " << curND->GetTimeStamp() << std::endl;
+
+  unsigned int* indexNew = (unsigned int*)img->GetData();
+  unsigned int* indexOld = (unsigned int*)previousImage->GetData();
+
+  if (!(*indexNew == *indexOld))
+  {
+     m_Measurement->AddMeasurement(9, *indexNew);//x value is used as index
+     previousImage->Graft(img);
   }
 }
 
@@ -165,6 +181,7 @@ void mitk::IGTLMessageToUSImageFilter::Initiate(mitk::Image::Pointer& img,
 mitk::IGTLMessageToUSImageFilter::IGTLMessageToUSImageFilter()
   : m_upstream(nullptr)
 {
+   m_Measurement = mitk::IGTLMeasurements::GetInstance();
   MITK_DEBUG << "Instantiated this (" << this << ") mitkIGTMessageToUSImageFilter\n";
 }
 

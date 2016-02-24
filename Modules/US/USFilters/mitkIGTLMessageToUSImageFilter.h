@@ -22,6 +22,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include <mitkUSImageSource.h>
 #include <mitkIGTLMessageSource.h>
 #include <igtlImageMessage.h>
+#include <mitkIGTLMeasurements.h>
 
 namespace mitk
 {
@@ -65,6 +66,8 @@ class MITKUS_EXPORT IGTLMessageToUSImageFilter : public USImageSource
 
  private:
   mitk::IGTLMessageSource* m_upstream;
+
+  mitk::IGTLMeasurements* m_Measurement;
 
   /**
    * \brief Templated method to copy the data of the OIGTL message to the image, depending

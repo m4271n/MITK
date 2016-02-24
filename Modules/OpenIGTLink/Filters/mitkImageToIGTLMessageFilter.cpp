@@ -18,6 +18,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 #include "mitkImageReadAccessor.h"
 #include "itkByteSwapper.h"
 #include "igtlImageMessage.h"
+#include <chrono>
 
 mitk::ImageToIGTLMessageFilter::ImageToIGTLMessageFilter()
 {
@@ -25,6 +26,9 @@ mitk::ImageToIGTLMessageFilter::ImageToIGTLMessageFilter()
   this->SetNumberOfRequiredOutputs(1);
   this->SetNthOutput(0, output.GetPointer());
   this->SetNumberOfRequiredInputs(1);
+
+  //setup measurements
+  this->m_Measurement = mitk::IGTLMeasurements::GetInstance();
 }
 
 void mitk::ImageToIGTLMessageFilter::GenerateData()
@@ -201,6 +205,11 @@ void mitk::ImageToIGTLMessageFilter::GenerateData()
     imgMsg->Pack();
 
     output->SetMessage(imgMsg.GetPointer());
+
+    long long startTime = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    igtl::ImageMessage* imageMessage = (igtl::ImageMessage*)(imgMsg.GetPointer());
+    unsigned int* index = (unsigned int*)imageMessage->GetScalarPointer();
+    m_Measurement->AddMeasurement(1, *index, startTime); //first four pixels are used as index
   }
 }
 
