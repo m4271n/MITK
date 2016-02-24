@@ -29,6 +29,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 //remove later
 #include <igtlTrackingDataMessage.h>
+#include <igtlImageMessage.h>
 
 
 //TODO: Which timeout is acceptable and also needed to transmit image data? Is there a maximum data limit?
@@ -566,7 +567,7 @@ ITK_THREAD_RETURN_TYPE mitk::IGTLDevice::ThreadStartConnecting(void* pInfoStruct
    return ITK_THREAD_RETURN_VALUE;
 }
 
-void mitk::IGTLDevice::AddTrackingMeasurements(const int index, const igtl::MessageBase::Pointer msg, const long long timeStamp)
+void mitk::IGTLDevice::AddTrackingMeasurements(const int measurementPoint, const igtl::MessageBase::Pointer msg, const long long timeStamp)
 {
   //Apparently this is the only "elegant" way to do a class check.. or is it???
   if (dynamic_cast<igtl::TrackingDataMessage*>(msg.GetPointer()) != nullptr)
@@ -577,6 +578,12 @@ void mitk::IGTLDevice::AddTrackingMeasurements(const int index, const igtl::Mess
     tdMsg->GetTrackingDataElement(0, trackingData);
     float x_pos, y_pos, z_pos;
     trackingData->GetPosition(&x_pos, &y_pos, &z_pos);
-    m_Measurement->AddMeasurement(index, x_pos, timeStamp); //x value is used as index
+    m_Measurement->AddMeasurement(measurementPoint, x_pos, timeStamp); //x value is used as index
+  }
+  else if (dynamic_cast<igtl::ImageMessage*>(msg.GetPointer()) != nullptr)
+  {
+     igtl::ImageMessage* imageMessage = (igtl::ImageMessage*)(msg.GetPointer());
+     unsigned int* index = (unsigned int*)imageMessage->GetScalarPointer();
+     m_Measurement->AddMeasurement(measurementPoint, *index, timeStamp); //x value is used as index
   }
 }

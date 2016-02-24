@@ -16,6 +16,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 #include "mitkUSDevice.h"
 #include "mitkImageReadAccessor.h"
+#include "mitkImageWriteAccessor.h"
 
 // US Control Interfaces
 #include "mitkUSControlInterfaceProbes.h"
@@ -593,6 +594,11 @@ void mitk::USDevice::GenerateData()
     output->Initialize(m_Image->GetPixelType(), m_Image->GetDimension(),
       m_Image->GetDimensions());
   }
+
+  mitk::ImageWriteAccessor writeAccessor(m_Image, m_Image->GetSliceData(0, 0, 0));
+
+  static unsigned int counter = 0;
+  *(unsigned int*)(const_cast<void*>(writeAccessor.GetData())) = counter++;
 
   mitk::ImageReadAccessor inputReadAccessor(m_Image,
     m_Image->GetSliceData(0, 0, 0));
