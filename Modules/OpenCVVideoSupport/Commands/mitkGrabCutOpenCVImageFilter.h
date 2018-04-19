@@ -27,6 +27,7 @@ See LICENSE.txt or http://www.mitk.org for details.
 
 // opencv headers
 #include "cv.h"
+//#include <cv>
 
 namespace itk {
 template<unsigned int T> class Index;
